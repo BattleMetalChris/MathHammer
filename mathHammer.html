@@ -356,6 +356,7 @@ anti-stuff
         var $modelStat = $('#pastedom .dsProfileBaseWrap');
         var $weaponStat = $('#pastedom .wTable .bkg');
         var $modelSpecialRules = $('#pastedom .dsRightСol');
+        var $keywords = $('#pastedom .ds2colKW');
 
         var aSpecial = ['Feel No Pain', 'Invulnerable', 'Vanguard Predator:','Stealth'];
         var aAnti = ['Infantry', 'Vehicle', 'Monster', 'Character', 'Fly', 'Psyker', 'Beast', 'Cavalry', 'Walker', 'Titanic', 'Daemon', 'Heretic Astartes', 'Adeptus Astartes', 'Orks', 'Tyranids', 'Necrons', ]; //don't really need this, just look for keywords
@@ -491,6 +492,37 @@ anti-stuff
                 $row.find('.weapon_special').val(aWeaponKeywords.join('\n'));
             });
         }
+
+        var getKeywords = function(element) {
+            let sibling = $(element.nextElementSibling);
+            do {
+                if ($(sibling).text().trim()) {
+                    return $(sibling).text().trim().split(',');
+                }
+                sibling = $(sibling).next();
+            } while (sibling.length);
+
+            return [];
+        }
+
+        let keyWords = {    all:        [],
+                            faction:    [],
+        };
+
+        $keywords.find('>div').each(function(){
+            $(this).contents().filter((index, elem) => elem.nodeType == 3).each(function(){
+                if (this.textContent == 'KEYWORDS – ALL MODELS:') {
+                    keyWords.all = getKeywords(this);
+                }
+                else if (this.textContent == 'FACTION KEYWORDS:') {
+                    keyWords.faction = getKeywords(this);
+                }
+                else if (this.textContent.includes('ONLY:')) {
+                    let model = this.textContent.split('ONLY:')[0].trim();
+                    keyWords[model] = getKeywords(this);
+                }
+            });
+        });
 
         checkButton();
     }
@@ -895,12 +927,16 @@ anti-stuff
 
     function triangleNumber(num) {
         // like factorial, but addition
+        num = parseInt(num);
+
         if (num === 0) {
             return 0;
         } else if (num === 1) {
             return 1;
+        } else if (num === -1) {
+            return -1;
         } else {
-            return num + triangleNumber(num - 1);
+            return num + triangleNumber(num - (num < 0 ? -1 : 1));
         }
     }
 
