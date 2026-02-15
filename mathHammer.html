@@ -25,7 +25,7 @@ anti-stuff
             }
 
             .container {
-                max-width: 1000px;
+                max-width: 1200px;
                 margin: auto;
                 background: #fff;
                 padding: 20px;
@@ -122,7 +122,18 @@ anti-stuff
 
             /* ===== MODEL GRID ===== */
             .modelGrid {
-                grid-template-columns: /* Name */ 6fr /* M */ 3fr /* T */ 3fr /* Sv */ 2fr /* Invuln */ 2fr /* W */ 3fr /* Ld */ 3fr /* OC */ 3fr /* Special */ 5fr /* radio */ 1fr;
+                grid-template-columns: 
+                /* Name */ 6fr 
+                /* M */ 3fr 
+                /* T */ 3fr 
+                /* Sv */ 2fr 
+                /* Invuln */ 2fr 
+                /* W */ 3fr 
+                /* Ld */ 3fr 
+                /* OC */ 3fr 
+                /* Keywords */ 4fr
+                /* Special */ 5fr 
+                /* radio */ 1fr;
             }
 
             /* ===== WEAPON GRID ===== */
@@ -224,6 +235,7 @@ anti-stuff
                         <div>Wounds</div>
                         <div>Leadership</div>
                         <div>Objective Control</div>
+                        <div>Keywords</div>
                         <div>Special Rules</div>
                         <!-- No heading for radio -->
                     </div>
@@ -237,10 +249,10 @@ anti-stuff
                         <input class="wounds"/>
                         <input class="leadership"/>
                         <input class="objective_control"/>
+                        <textarea class="keywords"></textarea>
                         <textarea class="special"></textarea>
                         <input type="radio" name="attacker_radio" class="attacker_radio" checked="checked" onchange="checkButton()"/>
                     </div>
-                    <div class="specialRules"></div>
                 </div>
                 <div class="defender">
                     <h2>Defender Stats</h2>
@@ -255,6 +267,7 @@ anti-stuff
                         <div>Wounds</div>
                         <div>Leadership</div>
                         <div>Objective Control</div>
+                        <div>Keywords</div>
                         <div>Special Rules</div>
                     </div>
                     <!-- Body -->
@@ -268,11 +281,11 @@ anti-stuff
                             <input class="wounds"/>
                             <input class="leadership"/>
                             <input class="objective_control"/>
+                            <textarea class="keywords"></textarea>
                             <textarea class="special"></textarea>
                             <input type="radio" name="defender_radio" class="defender_radio" checked="checked" onchange="checkButton()"/>
                         </div>
                     </div>
-                    <div class="specialRules"></div>
                 </div>
             </div>
             <!-- WEAPON STATS -->
@@ -366,7 +379,8 @@ anti-stuff
             'Vanguard Predator:': 'Vanguard Predator, reroll-hits 1',
         };
 
-        $modelSection.find('.specialRules').empty();
+        $modelSection.find('.special').val('');
+        $modelSection.find('.keywords').val('');
         $modelSection.find('.body.modelGrid').each(function() {
             if (!$(this).is($modelSection.find('.body.modelGrid').first())) {
                 $(this).remove();
@@ -376,6 +390,7 @@ anti-stuff
             $weaponSection.find('.body.weaponGrid').each(function() {
                 $(this).find('span.name').text('');
                 $(this).find('input').val('');
+                $(this).find('textarea').val('');
                 if (!$(this).is($weaponSection.find('.body.weaponGrid').first())) {
                     $(this).remove();
                 }
@@ -497,7 +512,7 @@ anti-stuff
             let sibling = $(element.nextElementSibling);
             do {
                 if ($(sibling).text().trim()) {
-                    return $(sibling).text().trim().split(',');
+                    return $(sibling).text().trim().split(',').map(keyword => keyword.trim().toTitleCase());
                 }
                 sibling = $(sibling).next();
             } while (sibling.length);
@@ -511,7 +526,7 @@ anti-stuff
 
         $keywords.find('>div').each(function(){
             $(this).contents().filter((index, elem) => elem.nodeType == 3).each(function(){
-                if (this.textContent == 'KEYWORDS – ALL MODELS:') {
+                if (this.textContent == 'KEYWORDS – ALL MODELS:' || this.textContent == 'KEYWORDS:') {
                     keyWords.all = getKeywords(this);
                 }
                 else if (this.textContent == 'FACTION KEYWORDS:') {
@@ -519,10 +534,27 @@ anti-stuff
                 }
                 else if (this.textContent.includes('ONLY:')) {
                     let model = this.textContent.split('ONLY:')[0].trim();
-                    keyWords[model] = getKeywords(this);
+                    keyWords[model.toTitleCase()] = getKeywords(this);
                 }
             });
         });
+
+        for ( let type of Object.keys(keyWords)) {
+            if (keyWords[type].length) {
+                $modelSection.find('.body.modelGrid').each(function() {
+                    let modelName = $(this).find('span.name').text().trim();
+                    if (type == 'all' || type == 'faction' || (type == modelName) || (keyWords[type] && keyWords[type].length && keyWords[type].some(keyword => keyword.toLowerCase() === modelName.toLowerCase()))) {
+                        let $textarea = $(this).find('textarea.keywords');
+                        let currentKeywords = $textarea.val();
+                        let newKeywords = currentKeywords ? currentKeywords + '\n' + keyWords[type].join('\n') : keyWords[type].join('\n');
+                        $textarea.val(newKeywords);
+                        
+                        $textarea.height(0);        
+                        $textarea.height($textarea[0].scrollHeight);
+                    }
+                });
+            }
+        }
 
         checkButton();
     }
@@ -584,6 +616,7 @@ anti-stuff
             leadership: $attacker.find('.leadership').val(),
             oc: $attacker.find('.objective_control').val(),
             special: $attacker.find('.special').val().replace(/\u00A0/g, ' '),
+            keywords: $attacker.find('.keywords').val().replace(/\u00A0/g, ' '),
         };
 
         var defender = {
@@ -596,6 +629,7 @@ anti-stuff
             leadership: $defender.find('.leadership').val(),
             oc: $defender.find('.objective_control').val(),
             special: $defender.find('.special').val().replace(/\u00A0/g, ' '),
+            keywords: $defender.find('.keywords').val().replace(/\u00A0/g, ' '),
         };
 
         var weapons = {
@@ -654,53 +688,59 @@ anti-stuff
             let woundMod = parseInt($('.wound_mod').val());
             woundMod = woundMod ? (woundMod > 0 ? '+' : '') + woundMod : '';
 
-			attacker.special.hasSpecial('reroll-hits', (keyword, num) => {
-				if (rerollhits < num) {
+			attacker.special.hasSpecial('reroll-hits', (num) => {
+				if (rerollhits < parseInt(num)) {
                     attacker.special.hasSpecial('Vanguard Predator', () => { rerollHitsRule = 'Vanguard Predator'; });
-                    rerollhits = special;
+                    rerollhits = parseInt(num);
                 }
 			});
+            attacker.special.hasSpecial('reroll-wounds', (num) => {
+                if (rerollwounds < parseInt(num)) {
+                    attacker.special.hasSpecial('Vanguard Predator', () => { rerollWoundsRule = 'Vanguard Predator'; });
+                    rerollwounds = parseInt(num);
+                }
+            });
 
-            if (attacker.special.includes('reroll-hits')) {
-                let special = parseInt(attacker.special.split('reroll-hits')[1].split(',')[0].trim(), );
-                if (rerollhits < special) {
-                    if (attacker.special.includes('Vanguard Predator')) {
-                        rerollHitsRule = 'Vanguard Predator';
-                    }
-                    rerollhits = special;
+            weapon.special.hasSpecial('reroll-hits', (num) => {
+                if (rerollhits < parseInt(num)) {
+                    rerollhits = parseInt(num);
                 }
-            }
-            if (weapon.special.includes('reroll-hits')) {
-                let special = parseInt(weapon.special.split('reroll-hits')[1].split(',')[0].trim(), );
-                if (rerollhits < special) {
-                    rerollhits = special;
+            });
+             weapon.special.hasSpecial('reroll-wounds', (num) => {
+                if (rerollwounds < parseInt(num)) {
+                    rerollwounds = parseInt(num);
                 }
-            }
-            if (attacker.special.includes('reroll-wounds')) {
-                let special = parseInt(attacker.special.split('reroll-wounds')[1].split(',')[0].trim(), );
-                if (rerollwounds < special) {
-                    if (attacker.special.includes('Vanguard Predator')) {
-                        rerollWoundsRule = 'Vanguard Predator';
-                    }
-                    rerollwounds = special;
-                }
-            }
-            if (weapon.special.includes('reroll-wounds')) {
-                let special = parseInt(weapon.special.split('reroll-wounds')[1].split(',')[0].trim(), );
-                if (rerollwounds < special) {
-                    rerollwounds = special;
-                }
-            }
-            if (weapon.special.includes('twin-linked')) {
+            });
+
+            weapon.special.hasSpecial('twin-linked', (num) => {
                 if (rerollwounds < 6) {
                     rerollwounds = 6;
                     rerollWoundsRule = 'Twin-linked';
                 }
-            }
-            if (weapon.special.includes('sustained hits')) {
-                susHitsStr = weapon.special.split('sustained hits')[1].split(',')[0].trim().toUpperCase();
+            });
+            weapon.special.hasSpecial('sustained hits', (num) => {
+                susHitsStr = num;
                 susHits = getAvg(susHitsStr);
-            }
+            });
+
+            let anti_message = '';
+            let anti_crit = null;
+
+            weapon.special.hasSpecial('anti-', (type, keyword) => {
+                type = type.replace(/\s+/g, ' ').trim();
+                let match = type.match(/(\d+\+)$/); // match a number followed by + at the end of the string, which indicates critical hit threshold for anti-weapon special rules (e.g. "Anti-Infantry 3+" means that the weapon scores a critical hit on rolls of 3+ against infantry units)
+                if (!match) return;
+
+                let roll = match[1];
+                type = type.slice(0, match.index).trim();
+
+                if (defender.keywords.toLowerCase().includes(type.toLowerCase())) {
+                    anti_message = 'anti-' + type.toTitleCase() +' ' + roll;
+                    if (anti_crit === null ||parseInt(roll) < anti_crit) {
+                        anti_crit = parseInt(roll);
+                    }
+                }                
+            });
 
 			let halfRange = !!$('.half_range:checked').length;
 
@@ -733,13 +773,16 @@ anti-stuff
             let strength = weapon.strength.toLowerCase() == 'user' ? attacker.strength : getAvg(weapon.strength);
             let strengthStr = weapon.strength.toLowerCase() == 'user' ? 'user (' + attacker.strength + ')' : weapon.strength;
             let woundRoll = getWoundRoll(strength, defender.toughness);
-            showMessage('Roll to wound: Strength ' + strengthStr + ', toughness ' + defender.toughness + (woundMod ? ' (' + woundMod + ' mod) ' : '') + ' - wounding on ' + woundRoll.replace('+', 's') + (rerollwounds ? ', rerolling ' + (rerollwounds < 6 ? rerollwounds + 's' : 'misses') + (rerollWoundsRule ? ' (' + rerollWoundsRule + ')' : '') : ''), );
+            if (parseInt(woundRoll) >= anti_crit && anti_crit !== null) {
+                woundRoll = anti_crit + '+';
+            }
+            showMessage('Roll to wound: Strength ' + strengthStr + ', toughness ' + defender.toughness + (woundMod ? ' (' + woundMod + ' mod) ' : '') + ' ' +anti_message + ' - wounding on ' + woundRoll.replace('+', 's') + (rerollwounds ? ', rerolling ' + (rerollwounds < 6 ? rerollwounds + 's' : 'misses') + (rerollWoundsRule ? ' (' + rerollWoundsRule + ')' : '') : ''), );
 
             if (critHits) {
                 showMessage('Lethal hits: ' + Math.round(critHits * 1000, 4) / 1000 + ' hits auto-wound', );
             }
 
-            let critWounds = calcDiceRoll(score, '6+', 0, rerollwounds);
+            let critWounds = calcDiceRoll(score, (anti_crit ? anti_crit + '+': '6+'), 0, rerollwounds);
             score = calcDiceRoll(score - critHits, woundRoll, woundMod, rerollwounds) + critHits;
             showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds');
 
@@ -945,11 +988,25 @@ anti-stuff
     }
 
 	String.prototype.hasSpecial = function(keyword, foundFunc, options = null) {
-		if (this.toLowerCase().includes(keyword)) {
-            keywordNum = this.toLowerCase().split(keyword)[1].split(/[,\n]/)[0].trim().toUpperCase();
-			foundFunc(keywordNum, keyword);
-		}
+        const lower = this.toLowerCase();
+        const key   = keyword.toLowerCase();
+        const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');// Escape keyword for regex safety
+        const regex = new RegExp(
+            escaped + "(.*?)(?=,|\\n|$)",
+            "g"
+        ); // Match keyword followed by any characters until a comma, newline, or end of string
+    
+		while ((match = regex.exec(lower)) !== null) {
+            let keywordArgs = match[1].trim().toUpperCase();
+
+            foundFunc(keywordArgs, keyword, options);
+        }
 	}
+    String.prototype.toTitleCase = function() {
+        return this.replace(/\w\S*/g, function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    }
 
 
 	
