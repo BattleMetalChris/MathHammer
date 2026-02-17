@@ -4,183 +4,17 @@
 
 Todo:
 swap attacker/defender
-anti-stuff
+
 -->
     <head>
         <meta charset="UTF-8">
         <title>40k Statblock Parser</title>
-        ```
+
 	
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                background: #f4f4f4;
-            }
-
-            h2 {
-                margin-top: 30px;
-            }
-
-            .container {
-                max-width: 1200px;
-                margin: auto;
-                background: #fff;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            }
-
-            textarea {
-                width: 100%;
-                height: 200px;
-                padding: 10px;
-                font-family: monospace;
-                resize: vertical;
-            }
-
-            .section {
-                margin-top: 25px;
-            }
-
-            #buttonSection span {
-                font-size: 15px;
-                color: red;
-                font-weight: bold;
-                padding: 10px;
-            }
-
-            #buttonSection button {
-                font-size: 30px;
-                display: none;
-            }
-
-            #buttonSection .shooting_warning, #buttonSection .melee_warning {
-                display: none;
-            }
-
-            #modifierSection input {
-                padding: 5px;
-                margin-right: 10px;
-                padding-left: 10px;
-            }
-
-            #modifierSection input[type='checkbox'] {
-                height: 30px;
-                width: 30px;
-                position: relative;
-                top: 9px;
-            }
-
-            #combatSection .message {
-                min-width: 10px;
-                height: 20px;
-            }
-
-            /* ===== PASTE GRID ===== */
-            .pasteGrid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
-
-            .pasteBox label {
-                font-weight: bold;
-                display: block;
-                margin-bottom: 6px;
-            }
-
-            /* Responsive stack */
-            @media (max-width: 800px) {
-                .pasteGrid {
-                    grid-template-columns: 1fr;
-                }
-            }
-
-            /* ===== GRID SHARED STYLES ===== */
-            .grid {
-                display: grid;
-                gap: 8px;
-                margin-top: 10px;
-            }
-
-            .grid.header div {
-                font-weight: bold;
-                background: #eee;
-                padding: 6px;
-                text-align: center;
-            }
-
-            .grid input {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 6px;
-                text-align: center;
-            }
-
-            /* ===== MODEL GRID ===== */
-            .modelGrid {
-                grid-template-columns: 
-                /* Name */ 6fr 
-                /* M */ 3fr 
-                /* T */ 3fr 
-                /* Sv */ 2fr 
-                /* Invuln */ 2fr 
-                /* W */ 3fr 
-                /* Ld */ 3fr 
-                /* OC */ 3fr 
-                /* Keywords */ 4fr
-                /* Special */ 5fr 
-                /* radio */ 1fr;
-            }
-
-            /* ===== WEAPON GRID ===== */
-            .weaponGrid {
-                grid-template-columns: /* Name */ 6fr /* Range */ 3fr /* A */ 3fr /* BS/WS */ 3fr /* S */ 3fr /* AP */ 3fr /* D */ 3fr /* Special */ 5fr /* radio */ 1fr;
-                /* D */
-            }
-
-            .modelGrid .hidden {
-                display: none;
-            }
-
-            .modelRow {
-                display: contents;
-                /* lets inputs align to grid */
-            }
-
-            .weaponRow {
-                display: contents;
-                /* lets inputs align to grid */
-            }
-
-            .grid.header {
-                border: 1px solid #ccc;
-                border-bottom: none;
-            }
-
-            .grid.body {
-                border: 1px solid #ccc;
-                padding: 6px;
-            }
-
-            .grid.body input {
-                height: 30px;
-            }
-
-            .grid.body textarea {
-                height: 50px;
-                padding: 2px;
-            }
-
-            #pastedom {
-                display: none;
-            }
-        </style>
-        ```
-	
+        <script src="mathHammer.js"></script>
+        <link rel="stylesheet" href="mathHammer.css">
 
     </head>
     <body>
@@ -194,6 +28,7 @@ anti-stuff
                     <label for="attackerPaste">Attacker</label>
                     <textarea id="attackerPaste" placeholder="Paste attacker statblock or Wahapedia page..."></textarea>
                 </div>
+                <button id="swapBtn">⇄ Swap</button>
                 <!-- Defender -->
                 <div class="pasteBox">
                     <label for="defenderPaste">Defender</label>
@@ -209,9 +44,9 @@ anti-stuff
                 <input name="half_range" class="half_range" type="checkbox" checked="false"/>
             </div>
             <div class="section" id="buttonSection">
-                <button class="calculate" onclick="calculate(true)">Calculate Shooting
+                <button id="calculateShooting"class="calculate">Calculate Shooting
 			</button>
-                <button class="calculate" onclick="calculate(false)">Calculate Melee
+                <button id="calculateMelee"class="calculate">Calculate Melee
 			</button>
                 <span class="attacker_warning">Attacker not populated</span>
                 <span class="defender_warning">Defender not populated</span>
@@ -222,57 +57,28 @@ anti-stuff
             <div class="section" id="combatSection"></div>
             <!-- MODEL STATS -->
             <div class="section" id="modelSection">
-                <div class="attacker">
+                <div class="attacker" data-side="attacker" data-role="model">
                     <h2>Attacker Stats</h2>
                     <h3 class="modelname"></h3>
-                    <!-- Header -->
-                    <div class="grid header modelGrid">
-                        <div>Name</div>
-                        <div>Move</div>
-                        <div>Toughness</div>
-                        <div>Save</div>
-                        <div>Invuln</div>
-                        <div>Wounds</div>
-                        <div>Leadership</div>
-                        <div>Objective Control</div>
-                        <div>Keywords</div>
-                        <div>Special Rules</div>
-                        <!-- No heading for radio -->
-                    </div>
-                    <!-- Inputs -->
-                    <div class="grid body modelGrid">
-                        <span class="name"></span>
-                        <input class="move"/>
-                        <input class="toughness"/>
-                        <input class="save"/>
-                        <input class="invuln"/>
-                        <input class="wounds"/>
-                        <input class="leadership"/>
-                        <input class="objective_control"/>
-                        <textarea class="keywords"></textarea>
-                        <textarea class="special"></textarea>
-                        <input type="radio" name="attacker_radio" class="attacker_radio" checked="checked" onchange="checkButton()"/>
-                    </div>
-                </div>
-                <div class="defender">
-                    <h2>Defender Stats</h2>
-                    <h3 class="modelname"></h3>
-                    <!-- Header -->
-                    <div class="grid header modelGrid">
-                        <div>Name</div>
-                        <div>Move</div>
-                        <div>Toughness</div>
-                        <div>Save</div>
-                        <div>Invuln</div>
-                        <div>Wounds</div>
-                        <div>Leadership</div>
-                        <div>Objective Control</div>
-                        <div>Keywords</div>
-                        <div>Special Rules</div>
-                    </div>
-                    <!-- Body -->
-                    <div class="grid body modelGrid">
-                        <div class="modelRow">
+                    <div class="grid modelGrid">
+                        <!-- Header -->
+                        <div class="grid header">
+                            <div>Count</div>
+                            <div>Name</div>
+                            <div>Move</div>
+                            <div>Toughness</div>
+                            <div>Save</div>
+                            <div>Invuln</div>
+                            <div>Wounds</div>
+                            <div>Leadership</div>
+                            <div>Objective Control</div>
+                            <div>Keywords</div>
+                            <div>Special Rules</div>
+                            <!-- No heading for radio -->
+                        </div>
+                        <!-- Inputs -->
+                        <div class="grid body">
+                            <input class="count" type="number" min="1" value="1"/>
                             <span class="name"></span>
                             <input class="move"/>
                             <input class="toughness"/>
@@ -283,732 +89,91 @@ anti-stuff
                             <input class="objective_control"/>
                             <textarea class="keywords"></textarea>
                             <textarea class="special"></textarea>
-                            <input type="radio" name="defender_radio" class="defender_radio" checked="checked" onchange="checkButton()"/>
+                            <input type="radio" name="attacker_radio" class="attacker_radio" checked="checked"/>
                         </div>
-                    </div>
+                    </div>  
+                </div>
+                <div class="defender" data-side="defender" data-role="model">
+                    <h2>Defender Stats</h2>
+                    <h3 class="modelname"></h3>
+                    <div class="grid modelGrid">
+                        <!-- Header -->
+                        <div class="grid header">
+                            <div>Count</div>
+                            <div>Name</div>
+                            <div>Move</div>
+                            <div>Toughness</div>
+                            <div>Save</div>
+                            <div>Invuln</div>
+                            <div>Wounds</div>
+                            <div>Leadership</div>
+                            <div>Objective Control</div>
+                            <div>Keywords</div>
+                            <div>Special Rules</div>
+                        </div>
+                        <!-- Body -->
+                        <div class="grid body">
+                            <input class="count" type="number" min="1" value="1"/>
+                            <span class="name"></span>
+                            <input class="move"/>
+                            <input class="toughness"/>
+                            <input class="save"/>
+                            <input class="invuln"/>
+                            <input class="wounds"/>
+                            <input class="leadership"/>
+                            <input class="objective_control"/>
+                            <textarea class="keywords"></textarea>
+                            <textarea class="special"></textarea>
+                            <input type="radio" name="defender_radio" class="defender_radio"/
+                        </div>
+                    </div>  
                 </div>
             </div>
             <!-- WEAPON STATS -->
             <div class="section" id="weaponSection">
-                <h2>Attacker Weapon Stats</h2>
-                <h3 id="weaponname"></h3>
-                <!-- Header -->
-                <div class="grid header weaponGrid">
-                    <div>Name</div>
-                    <div>Range</div>
-                    <div>Attacks</div>
-                    <div>BS/WS</div>
-                    <div>Strength</div>
-                    <div>AP</div>
-                    <div>Damage</div>
-                    <div>Special</div>
-                </div>
-                <!-- Body -->
-                <div class="grid body weaponGrid">
-                    <div class="weaponRow">
-                        <span class="name"></span>
-                        <input class="weapon_range"/>
-                        <input class="weapon_attacks"/>
-                        <input class="weapon_skill"/>
-                        <input class="weapon_strength"/>
-                        <input class="weapon_ap"/>
-                        <input class="weapon_damage"/>
-                        <textarea class="weapon_special"></textarea>
-                        <input type="checkbox" name="weapon_check[]" class="weapon_check" checked="false" onchange="checkButton()"/>
+                <div class="attacker" data-side="attacker" data-role="weapon">
+                
+                    <h2>Attacker Weapon Stats</h2>
+                    <h3 id="weaponname"></h3>
+                    <div class="grid weaponGrid">
+                        <!-- Header -->   
+                        <div class="grid header">
+                            <div>Name</div>
+                            <div>Range</div>
+                            <div>Attacks</div>
+                            <div>BS/WS</div>
+                            <div>Strength</div>
+                            <div>AP</div>
+                            <div>Damage</div>
+                            <div>Special</div>
+                        </div>
+                        <!-- Body -->
+                        <div class="grid body">
+                            <span class="name"></span>
+                            <input class="range"/>
+                            <input class="attacks"/>
+                            <input class="skill"/>
+                            <input class="strength"/>
+                            <input class="ap"/>
+                            <input class="damage"/>
+                            <textarea class="special"></textarea>
+                            <input type="checkbox" name="checked[]" class="check"/>
+                        </div>
                     </div>
-                </div>
+                </div>   
             </div>
             <div class="section" id="pastedom"></div>
-            ```
-	
+ 
         </div>
     </body>
 </html>
 <script>
+
+    var mathHammer;
     $(document).ready(function() {
-        $('.pasteBox textarea').on('paste', function(e) {
-            const clipboardData = e.originalEvent.clipboardData;
-
-            // HTML version (what you want)
-            const html = clipboardData.getData('text/html');
-
-            // Plain text fallback
-            const text = clipboardData.getData('text/plain');
-
-            //console.log("HTML:", html);
-            //console.log("Text:", text);
-
-            let wahaURL = 'https://wahapedia.ru';
-
-            var isAttacker = $(e.target).prop('id').startsWith('attacker');
-
-            if (html) {
-                addToDOM(html);
-                parseHTML(isAttacker);
-            } else if (text.startsWith(wahaURL)) {
-                parseURL(isAttacker, text);
-            } else {
-                parseText(isAttacker, text);
-            }
-        });
+        mathHammer = MathHammer();
+        mathHammer.init();    
     });
 
-    function addToDOM(html) {
-        var domdiv = $('#pastedom');
 
-        domdiv.empty();
-        domdiv.append($(html));
-    }
-
-    function parseHTML(isAttacker) {
-        var type = isAttacker ? 'attacker' : 'defender';
-
-        var $modelSection = $('#modelSection .' + type);
-        var $weaponSection = $('#weaponSection');
-        var $header = $('#pastedom .dsH2Header');
-        var $modelStat = $('#pastedom .dsProfileBaseWrap');
-        var $weaponStat = $('#pastedom .wTable .bkg');
-        var $modelSpecialRules = $('#pastedom .dsRightСol');
-        var $keywords = $('#pastedom .ds2colKW');
-
-        var aSpecial = ['Feel No Pain', 'Invulnerable', 'Vanguard Predator:','Stealth'];
-        var aAnti = ['Infantry', 'Vehicle', 'Monster', 'Character', 'Fly', 'Psyker', 'Beast', 'Cavalry', 'Walker', 'Titanic', 'Daemon', 'Heretic Astartes', 'Adeptus Astartes', 'Orks', 'Tyranids', 'Necrons', ]; //don't really need this, just look for keywords
-        var aSpecialAcronyms = {
-            'Feel No Pain': 'FNP',
-            Invulnerable: 'Inv',
-            'Vanguard Predator:': 'Vanguard Predator, reroll-hits 1',
-        };
-
-        $modelSection.find('.special').val('');
-        $modelSection.find('.keywords').val('');
-        $modelSection.find('.body.modelGrid').each(function() {
-            if (!$(this).is($modelSection.find('.body.modelGrid').first())) {
-                $(this).remove();
-            }
-        });
-        if (isAttacker) {
-            $weaponSection.find('.body.weaponGrid').each(function() {
-                $(this).find('span.name').text('');
-                $(this).find('input').val('');
-                $(this).find('textarea').val('');
-                if (!$(this).is($weaponSection.find('.body.weaponGrid').first())) {
-                    $(this).remove();
-                }
-            });
-        }
-
-        $modelSection.find('.modelname').text($header.find('>div').text());
-
-        $modelStat.each(function() {
-            if (!$(this).is($modelStat.first())) {
-                let $newRow = $modelSection.find('.body.modelGrid').first().clone();
-                $newRow.prop('checked', false);
-                $modelSection.find('.body.modelGrid').last().after($newRow);
-            }
-
-            let $row = $modelSection.find('.body.modelGrid').last();
-
-            let name = $(this).find('.dsProfileWrapRight span').first().text();
-
-            let charClass = '.dsCharWrap';
-            if (!$(this).find('.dsCharWrap').length)
-                charClass = '.dsCharWrapM';
-
-            let move = $(this).find(charClass).eq(0).find('.dsCharValue').text();
-            let toughness = $(this).find(charClass).eq(1).find('.dsCharValue').text();
-            let save = $(this).find(charClass).eq(2).find('.dsCharValue').text();
-            let wounds = $(this).find(charClass).eq(3).find('.dsCharValue').text();
-            let leadership = $(this).find(charClass).eq(4).find('.dsCharValue').text();
-            let oc = $(this).find(charClass).eq(5).find('.dsCharValue').text();
-            let invuln = $(this).next('.dsInvulWrap').find('.dsCharInvulValue').text();
-
-            if (!name)
-                name = $header.find('>div').text();
-
-            $row.find('span.name').text(name);
-            $row.find('input.move').val(move);
-            $row.find('input.toughness').val(toughness);
-            $row.find('input.save').val(save);
-            $row.find('input.invuln').val(invuln);
-            $row.find('input.wounds').val(wounds);
-            $row.find('input.leadership').val(leadership);
-            $row.find('input.objective_control').val(oc);
-        });
-
-        $modelSection.find('.body.modelGrid').first().find('input[type=radio]').prop('checked', true);
-
-        let special = [];
-        $modelSpecialRules.find('.dsAbility').each(function() {
-            //if ($(this).text().startsWith('CORE:')) {
-
-            let getAbilities = function() {
-                let abilities = $(this).text().replace(/\u00A0/g, ' ');
-                let aFound = arrayElementAsSubstring(abilities, aSpecial);
-                for (let ability of aFound) {
-                    for (let phrase of arrayElementAsSubstring(ability, Object.getOwnPropertyNames(aSpecialAcronyms), )) {
-                        let acronym = aSpecialAcronyms[phrase];
-                        abilities = abilities.replace(phrase, acronym);
-                        //abilities = abilities.replaceAll(' ', '');
-                    }
-                }
-                if (aFound.length)
-                    special.push(abilities.replace(/\u00A0/g, ' '));
-            };
-
-            $(this).find('[data-tooltip-content]').each(getAbilities);
-            $(this).children().first().each(getAbilities);
-            //}
-        });
-
-        $modelSection.find('textarea.special').val(special.join('\n'));
-
-        if (isAttacker) {
-            $weaponStat.find('>tr').each(function() {
-                if ($weaponSection.find('.body.weaponGrid').first().find('span.name').text()) {
-                    let $newRow = $weaponSection.find('.body.weaponGrid').first().clone();
-                    $newRow.prop('checked', true);
-                    $weaponSection.find('.body.weaponGrid').last().after($newRow);
-                }
-
-                let $row = $weaponSection.find('.body.weaponGrid').last();
-
-                let $nameCells = $(this).find('.wTable2_short>span').clone();
-                if (!$nameCells.length) {
-                    if ($weaponSection.find('.body.weaponGrid').length > 1) {
-                        $row.remove();
-                    }
-                    return true;
-                }
-
-                $nameCells.find('span').remove();
-                let name = $nameCells.text();
-                let range = $(this).find('.wTable2_short').siblings().eq(1).text().trim();
-                let attacks = $(this).find('.wTable2_short').siblings().eq(2).text().trim();
-                let wsbs = $(this).find('.wTable2_short').siblings().eq(3).text().trim();
-                let strength = $(this).find('.wTable2_short').siblings().eq(4).text().trim();
-                let ap = $(this).find('.wTable2_short').siblings().eq(5).text().trim();
-                let damage = $(this).find('.wTable2_short').siblings().eq(6).text().trim();
-
-                const aWeaponKeywords = [];
-
-                $(this).find('.wTable2_short>span>span').each(function() {
-                    let keyword = $(this).text().trim();
-                    if (keyword)
-                        aWeaponKeywords.push(keyword.replace(/\u00A0/g, ' '));
-                });
-
-                $row.find('.name').text(name);
-                $row.find('.weapon_range').val(range);
-                $row.find('.weapon_attacks').val(attacks);
-                $row.find('.weapon_skill').val(wsbs);
-                $row.find('.weapon_strength').val(strength);
-                $row.find('.weapon_ap').val(ap);
-                $row.find('.weapon_damage').val(damage);
-                $row.find('.weapon_special').val(aWeaponKeywords.join('\n'));
-            });
-        }
-
-        var getKeywords = function(element) {
-            let sibling = $(element.nextElementSibling);
-            do {
-                if ($(sibling).text().trim()) {
-                    return $(sibling).text().trim().split(',').map(keyword => keyword.trim().toTitleCase());
-                }
-                sibling = $(sibling).next();
-            } while (sibling.length);
-
-            return [];
-        }
-
-        let keyWords = {    all:        [],
-                            faction:    [],
-        };
-
-        $keywords.find('>div').each(function(){
-            $(this).contents().filter((index, elem) => elem.nodeType == 3).each(function(){
-                if (this.textContent == 'KEYWORDS – ALL MODELS:' || this.textContent == 'KEYWORDS:') {
-                    keyWords.all = getKeywords(this);
-                }
-                else if (this.textContent == 'FACTION KEYWORDS:') {
-                    keyWords.faction = getKeywords(this);
-                }
-                else if (this.textContent.includes('ONLY:')) {
-                    let model = this.textContent.split('ONLY:')[0].trim();
-                    keyWords[model.toTitleCase()] = getKeywords(this);
-                }
-            });
-        });
-
-        for ( let type of Object.keys(keyWords)) {
-            if (keyWords[type].length) {
-                $modelSection.find('.body.modelGrid').each(function() {
-                    let modelName = $(this).find('span.name').text().trim();
-                    if (type == 'all' || type == 'faction' || (type == modelName) || (keyWords[type] && keyWords[type].length && keyWords[type].some(keyword => keyword.toLowerCase() === modelName.toLowerCase()))) {
-                        let $textarea = $(this).find('textarea.keywords');
-                        let currentKeywords = $textarea.val();
-                        let newKeywords = currentKeywords ? currentKeywords + '\n' + keyWords[type].join('\n') : keyWords[type].join('\n');
-                        $textarea.val(newKeywords);
-                        
-                        $textarea.height(0);        
-                        $textarea.height($textarea[0].scrollHeight);
-                    }
-                });
-            }
-        }
-
-        checkButton();
-    }
-
-    function arrayElementAsSubstring(string, array) {
-        var found = [];
-        $.each(array, function(index, val) {
-            if (string.replace(/\u00A0/g, ' ').includes(val)) {
-                found.push(val.replace(/\u00A0/g, ' '));
-            }
-        });
-        return found;
-    }
-
-    function parseText(isAttacker, text) {
-        alert('text');
-    }
-
-    function parseURL(isAttacker, text) {
-        alert("Can't parse URLs yet, try copying the page content");
-    }
-
-    function checkButton() {
-        var $modelSection = $('#modelSection');
-        var $weaponSection = $('#weaponSection');
-
-        var attackerPopulated = !!$modelSection.find('.attacker .body.modelGrid span.name').text().trim();
-        var defenderPopulated = !!$modelSection.find('.defender .body.modelGrid span.name').text().trim();
-        var weaponPopulated = !!$weaponSection.find('.body.weaponGrid span.name').text().trim();
-        var weaponChosen = !!$weaponSection.find('.body.weaponGrid input.weapon_check:checked', ).length;
-
-        $('#buttonSection .calculate').toggle(attackerPopulated && defenderPopulated && weaponPopulated && weaponChosen, );
-        $('#buttonSection .attacker_warning').toggle(!attackerPopulated);
-        $('#buttonSection .defender_warning').toggle(!defenderPopulated);
-        $('#buttonSection .weapon_warning').toggle(!weaponPopulated || !weaponChosen);
-    }
-
-    function calculate(isShooting) {
-        $('#buttonSection .shooting_warning').hide();
-        $('#buttonSection .melee_warning').hide();
-
-        var $attacker = $('#modelSection .attacker .body.modelGrid').filter(function() {
-            return $(this).find('.attacker_radio:checked').length;
-        }, );
-        var $defender = $('#modelSection .defender .body.modelGrid').filter(function() {
-            return $(this).find('.defender_radio:checked').length;
-        }, );
-        var $weapons = $('#weaponSection .body.weaponGrid').filter(function() {
-            return $(this).find('.weapon_check:checked').length;
-        });
-
-        var attacker = {
-            name: $attacker.find('.name').text().replace(/\u00A0/g, ' '),
-            move: $attacker.find('.move').val(),
-            toughness: $attacker.find('.toughness').val(),
-            save: $attacker.find('.save').val(),
-            invuln: $attacker.find('.invuln').val(),
-            wounds: $attacker.find('.wounds').val(),
-            leadership: $attacker.find('.leadership').val(),
-            oc: $attacker.find('.objective_control').val(),
-            special: $attacker.find('.special').val().replace(/\u00A0/g, ' '),
-            keywords: $attacker.find('.keywords').val().replace(/\u00A0/g, ' '),
-        };
-
-        var defender = {
-            name: $defender.find('.name').text().replace(/\u00A0/g, ' '),
-            move: $defender.find('.move').val(),
-            toughness: $defender.find('.toughness').val(),
-            save: $defender.find('.save').val(),
-            invuln: $defender.find('.invuln').val(),
-            wounds: $defender.find('.wounds').val(),
-            leadership: $defender.find('.leadership').val(),
-            oc: $defender.find('.objective_control').val(),
-            special: $defender.find('.special').val().replace(/\u00A0/g, ' '),
-            keywords: $defender.find('.keywords').val().replace(/\u00A0/g, ' '),
-        };
-
-        var weapons = {
-            ranged: [],
-            melee: []
-        };
-
-        $weapons.each(function() {
-            var weapon = {
-                name: $(this).find('.name').text().replace(/\u00A0/g, ' '),
-                range: $(this).find('.weapon_range').val(),
-                attacks: $(this).find('.weapon_attacks').val(),
-                skill: $(this).find('.weapon_skill').val(),
-                strength: $(this).find('.weapon_strength').val(),
-                ap: $(this).find('.weapon_ap').val(),
-                damage: $(this).find('.weapon_damage').val(),
-                special: $(this).find('.weapon_special').val().replace(/\u00A0/g, ' '),
-            };
-            if (weapon.special.includes('pistol')) {
-                weapons.melee.push(weapon);
-                weapons.ranged.push(weapon);
-            } else if (weapon.range.toLowerCase() == 'melee') {
-                weapons.melee.push(weapon);
-            } else {
-                weapons.ranged.push(weapon);
-            }
-        });
-
-        if (isShooting && !weapons.ranged.length) {
-            $('#buttonSection .shooting_warning').show();
-            return;
-        }
-        if (!isShooting && !weapons.melee.length) {
-            $('#buttonSection .melee_warning').show();
-            return;
-        }
-
-        $('#combatSection').empty();
-
-        var totalDmg = 0;
-
-        for (let weapon of isShooting ? weapons.ranged : weapons.melee) {
-            // Initial attacks
-            let rerollhits = 0;
-            let rerollwounds = 0;
-            let susHits = 0;
-            let rerollHitsRule = '';
-            let rerollWoundsRule = '';
-            let susHitsStr = '';
-			let dmgRule = '';
-			let hitRule = '';
-
-            let hitMod = parseInt($('.hit_mod').val());
-            hitMod = hitMod ? (hitMod > 0 ? '+' : '') + hitMod : '';
-
-            let woundMod = parseInt($('.wound_mod').val());
-            woundMod = woundMod ? (woundMod > 0 ? '+' : '') + woundMod : '';
-
-			attacker.special.hasSpecial('reroll-hits', (num) => {
-				if (rerollhits < parseInt(num)) {
-                    attacker.special.hasSpecial('Vanguard Predator', () => { rerollHitsRule = 'Vanguard Predator'; });
-                    rerollhits = parseInt(num);
-                }
-			});
-            attacker.special.hasSpecial('reroll-wounds', (num) => {
-                if (rerollwounds < parseInt(num)) {
-                    attacker.special.hasSpecial('Vanguard Predator', () => { rerollWoundsRule = 'Vanguard Predator'; });
-                    rerollwounds = parseInt(num);
-                }
-            });
-
-            weapon.special.hasSpecial('reroll-hits', (num) => {
-                if (rerollhits < parseInt(num)) {
-                    rerollhits = parseInt(num);
-                }
-            });
-             weapon.special.hasSpecial('reroll-wounds', (num) => {
-                if (rerollwounds < parseInt(num)) {
-                    rerollwounds = parseInt(num);
-                }
-            });
-
-            weapon.special.hasSpecial('twin-linked', (num) => {
-                if (rerollwounds < 6) {
-                    rerollwounds = 6;
-                    rerollWoundsRule = 'Twin-linked';
-                }
-            });
-            weapon.special.hasSpecial('sustained hits', (num) => {
-                susHitsStr = num;
-                susHits = getAvg(susHitsStr);
-            });
-
-            let anti_message = '';
-            let anti_crit = null;
-
-            weapon.special.hasSpecial('anti-', (type, keyword) => {
-                type = type.replace(/\s+/g, ' ').trim();
-                let match = type.match(/(\d+\+)$/); // match a number followed by + at the end of the string, which indicates critical hit threshold for anti-weapon special rules (e.g. "Anti-Infantry 3+" means that the weapon scores a critical hit on rolls of 3+ against infantry units)
-                if (!match) return;
-
-                let roll = match[1];
-                type = type.slice(0, match.index).trim();
-
-                if (defender.keywords.toLowerCase().includes(type.toLowerCase())) {
-                    anti_message = 'anti-' + type.toTitleCase() +' ' + roll;
-                    if (anti_crit === null ||parseInt(roll) < anti_crit) {
-                        anti_crit = parseInt(roll);
-                    }
-                }                
-            });
-
-			let halfRange = !!$('.half_range:checked').length;
-
-            showMessage('Attacker weapon: ' + weapon.name);
-
-            let score = getAvg(weapon.attacks);
-            let torrent = weapon.special.includes('torrent');
-
-			if (halfRange) weapon.special.hasSpecial('rapid fire', (rapidFireNum) => { 
-				weapon.attacks = modDice(weapon.attacks, rapidFireNum);
-				score += getAvg(rapidFireNum); 
-				hitRule = "Rapid fire "+rapidFireNum;	
-			});
-
-            showMessage('Roll to hit: ' + weapon.attacks + ' attacks' + (hitRule ? " ("+hitRule+") " : "") + ", "+(hitMod ? ' (' + hitMod + ' mod) ' : '') + 'hitting ' + (torrent ? 'automatically' : 'on ' + weapon.skill.replace('+', 's') + (rerollhits ? ', rerolling ' + (rerollhits < 6 ? rerollhits + 's' : 'misses') + (rerollHitsRule ? ' (' + rerollHitsRule + ')' : '') : '')), );
-
-            // to hit roll
-            susHits = calcDiceRoll(score, '6+', 0, rerollhits) * susHits;
-            score = score + susHits;
-
-            let critHits = 0;
-            if (weapon.special.includes('lethal hits')) {
-                critHits = calcDiceRoll(score, '6+', 0, rerollhits);
-            }
-            score = calcDiceRoll(score, torrent ? '1+' : weapon.skill, hitMod, rerollhits);
-
-            showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' hits' + (susHits ? ' (including ' + Math.round(susHits * 1000, 4) / 1000 + ' sustained hits)' : ''), );
-
-            // to wound roll
-            let strength = weapon.strength.toLowerCase() == 'user' ? attacker.strength : getAvg(weapon.strength);
-            let strengthStr = weapon.strength.toLowerCase() == 'user' ? 'user (' + attacker.strength + ')' : weapon.strength;
-            let woundRoll = getWoundRoll(strength, defender.toughness);
-            if (parseInt(woundRoll) >= anti_crit && anti_crit !== null) {
-                woundRoll = anti_crit + '+';
-            }
-            showMessage('Roll to wound: Strength ' + strengthStr + ', toughness ' + defender.toughness + (woundMod ? ' (' + woundMod + ' mod) ' : '') + ' ' +anti_message + ' - wounding on ' + woundRoll.replace('+', 's') + (rerollwounds ? ', rerolling ' + (rerollwounds < 6 ? rerollwounds + 's' : 'misses') + (rerollWoundsRule ? ' (' + rerollWoundsRule + ')' : '') : ''), );
-
-            if (critHits) {
-                showMessage('Lethal hits: ' + Math.round(critHits * 1000, 4) / 1000 + ' hits auto-wound', );
-            }
-
-            let critWounds = calcDiceRoll(score, (anti_crit ? anti_crit + '+': '6+'), 0, rerollwounds);
-            score = calcDiceRoll(score - critHits, woundRoll, woundMod, rerollwounds) + critHits;
-            showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds');
-
-            // armour save
-            let save = defender.save;
-
-            if (weapon.ap.includes('-')) {
-                let apParts = weapon.ap.split('-');
-                let saveParts = defender.save.split('+');
-                save = parseInt(saveParts[0]) + parseInt(apParts[1]);
-                save += '+';
-            }
-
-            let apMessage = weapon.ap && weapon.ap != '0' ? ' reduced to ' + save : '';
-
-            let saveParts = save.split('+');
-            let invulnParts = defender.invuln.split('+');
-            let invulnMessage = defender.invuln ? ' | Invuln:' + defender.invuln + (parseInt(invulnParts[0]) < parseInt(saveParts[0]) ? ' is better than ' + save : '') : '';
-            if (parseInt(invulnParts[0]) < parseInt(saveParts[0]))
-                save = defender.invuln;
-            save = Math.min(7, parseInt(save.split('+')[0])) + '+';
-
-            showMessage('Armour save: ' + defender.save + apMessage + invulnMessage + ' | ' + (parseInt(save.split('+')[0]) > 6 ? "can't save" : 'blocking on ' + save.split('+')[0] + 's'), );
-
-            if (weapon.special.includes('devastating wounds')) {
-                showMessage('Devastating Wounds: ' + Math.round(critWounds * 1000, 4) / 1000 + ' cannot be saved', );
-                score = calcBlockDiceRoll(score - critWounds, save) + critWounds;
-            } else {
-                score = calcBlockDiceRoll(score, save);
-            }
-
-            showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds');
-
-			if (weapon.special.includes('melta') && halfRange) {
-				let melta = weapon.special.split('melta')[1].split(/[,\n]/)[0].trim().toUpperCase();
-				dmgRule = "Melta "+melta;
-				weapon.damage = modDice(weapon.damage, melta);
-            }
-
-            showMessage(weapon.damage + ' dmg per wound' + (dmgRule ? " ("+dmgRule+") " : "") + (parseInt(defender.wounds) < parseInt(getAvg(weapon.damage)) ? ' | target can only lose ' + defender.wounds + ' wounds' : ''), );
-            score = score * Math.min(getAvg(weapon.damage), defender.wounds);
-
-            showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds lost', );
-
-            if (defender.special.includes('FNP')) {
-                let fnp = defender.special.split('FNP')[1].split('+')[0];
-
-                showMessage('Feel No Pain roll, blocks damage on ' + fnp + 's');
-                score = calcBlockDiceRoll(score, fnp + '+');
-                showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds lost', );
-            }
-
-            if (score < defender.wounds) {
-                showMessage('You would need ' + Math.round(1000 / (score / defender.wounds), 4) / 1000 + ' ' + attacker.name + (attacker.name.substr(attacker.name.length - 1) != 's' ? 's' : '') + ' to kill 1 ' + defender.name + ' in 1 round', );
-            } else {
-                showMessage('1 ' + attacker.name + ' can kill ' + Math.round((score / defender.wounds) * 1000, 4) / 1000 + ' ' + defender.name + (defender.name.substr(defender.name.length - 1) != 's' ? 's' : '') + ' in 1 round', );
-            }
-
-            showMessage('');
-        }
-    }
-
-    function calcDiceRoll(scoreIn, successNeeded, modifier = 0, rerolls=0) {
-
-		if (successNeeded == "1+") return scoreIn; // 1+ is a special case for things like Torrent, where hit-rolls auto-succeed
-
-		modifier = parseInt(modifier || 0);
-		let successInt = parseInt(successNeeded.replace('+', ''));
-
-		// could do this with a single calculation, but it's not time-critical and I think iterating is conceptually easier to understand
-		let rolls = [1,2,3,4,5,6];
-		let hitRate = 0;
-		for (roll of rolls) { 
-			if (roll == 6) {	// unmodified 6 is always a success
-				hitRate++;
-			} else if (roll + modifier >= successInt && roll > 1) {
-				hitRate++; // unmodified 1 is always a failure
-			}
-		}
-		// normalise it
-		hitRate = hitRate / 6;
-
-        let hitScore = scoreIn * hitRate;
-
-        if (!rerolls)
-            return hitScore;
-
-        let rerollScore = scoreIn * (1 - hitRate); // work out how many failed
-        rerollScore = calcDiceRoll(rerollScore, successNeeded, modifier); // roll those again
-
-        return hitScore + rerollScore;
-
-    }
-
-    function calcBlockDiceRoll(scoreIn, successNeeded) {
-        successNeeded = parseInt(successNeeded.replace('+', ''));
-
-        if (successNeeded > 6)
-            return scoreIn;
-        if (successNeeded < 1)
-            return 0;
-
-        let prob = (successNeeded - 1) / 6;
-
-        return scoreIn * prob;
-    }
-
-    function modDice(diceStr, modifier) {
-		diceStr = diceStr.toString();
-        let diceNum = 0;
-		let diceSize = 0;
-		let intDmg = 0;
-		let damageParts = diceStr.split("D");
-		if (damageParts.length == 1) {
-
-			intDmg = parseInt(damageParts[0]);
-		} else {
-
-			diceNum = damageParts[0];
-			damageParts = damageParts[1].split(/[+-]/);
-			diceSize = damageParts[0];
-			if (damageParts.length > 1) {
-				intDmg = parseInt((diceStr.includes('-') ? "-" : "") + damageParts[1]);	
-			}
-		}
-
-		intDmg += parseInt(modifier);
-
-		if (!diceSize) return intDmg;
-		if (!intDmg) return diceNum+"D"+diceSize;
-		return diceNum+"D"+diceSize+(intDmg >= 0 ? '+' : '')+intDmg;
-    }
-
-    function getWoundRoll(skill, toughness) {
-        
-        skill = parseInt(skill);
-        toughness = parseInt(toughness);
-
-        if (skill >= toughness * 2)
-            return '2+';
-        if (toughness >= skill * 2)
-            return '6+';
-        if (toughness > skill)
-            return '5+';
-        if (toughness < skill)
-            return '3+';
-        return '4+';
-    }
-
-    function showMessage(text) {
-        var newMessage = $('<div>');
-        newMessage.addClass('message');
-        newMessage.html(text);
-
-        $('#combatSection').append(newMessage);
-    }
-
-    function getAvg(number) {
-        let numberStr = number.toString();
-        if (!numberStr.includes('D'))
-            return parseInt(number);
-
-        let numberPart = 0;
-        let diceRoll = 0;
-        let numDice = 0;
-        let parts = [];
-
-        if (numberStr.includes('+')) {
-            parts = numberStr.split('+');
-            numberPart = parseInt(parts[1]);
-            numberStr = parts[0];
-        }
-        if (numberStr.includes('-')) {
-            parts = numberStr.split('-');
-            numberPart = -parseInt(parts[1]);
-            numberStr = parts[0];
-        }
-
-        parts = numberStr.split('D');
-        numDice = parts[0] ? parseInt(parts[0]) : 1;
-        diceRoll = parseInt(parts[1]);
-
-        return numDice * (triangleNumber(diceRoll) / diceRoll) + numberPart;
-    }
-
-    function triangleNumber(num) {
-        // like factorial, but addition
-        num = parseInt(num);
-
-        if (num === 0) {
-            return 0;
-        } else if (num === 1) {
-            return 1;
-        } else if (num === -1) {
-            return -1;
-        } else {
-            return num + triangleNumber(num - (num < 0 ? -1 : 1));
-        }
-    }
-
-    Number.prototype.clamp = function(min, max) {
-        return Math.min(Math.max(this, min), max);
-    }
-
-	String.prototype.hasSpecial = function(keyword, foundFunc, options = null) {
-        const lower = this.toLowerCase();
-        const key   = keyword.toLowerCase();
-        const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');// Escape keyword for regex safety
-        const regex = new RegExp(
-            escaped + "(.*?)(?=,|\\n|$)",
-            "g"
-        ); // Match keyword followed by any characters until a comma, newline, or end of string
-    
-		while ((match = regex.exec(lower)) !== null) {
-            let keywordArgs = match[1].trim().toUpperCase();
-
-            foundFunc(keywordArgs, keyword, options);
-        }
-	}
-    String.prototype.toTitleCase = function() {
-        return this.replace(/\w\S*/g, function(txt) {
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-        });
-    }
-
-
-	
-    ;
 </script>
