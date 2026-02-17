@@ -493,7 +493,7 @@ const MathHammer = (function() {
                     showMessage(attacker.count + ' models attacking & ' + defender.count + ' models defending');
                 }   
 
-                showMessage('Roll to hit: ' + weapon.attacks + (blast ? ' + ' + blast + ' blast' : '') + ' attacks each' + (hitRule ? " ("+hitRule+") " : "") + ", "+(hitMod ? ' (' + hitMod + ' mod) ' : '') + 'hitting ' + (torrent ? 'automatically' : 'on ' + weapon.skill.replace('+', 's') + (rerollhits ? ', rerolling ' + (rerollhits < 6 ? rerollhits + 's' : 'misses') + (rerollHitsRule ? ' (' + rerollHitsRule + ')' : '') : '')), );
+                showMessage('Roll to hit: ' + weapon.attacks + (blast ? ' + ' + blast + ' blast' : '') + ' attacks' + (attacker.count > 1 ? ' each' : '') + (hitRule ? " ("+hitRule+") " : "") + ", "+(hitMod ? ' (' + hitMod + ' mod) ' : '') + 'hitting ' + (torrent ? 'automatically' : 'on ' + weapon.skill.replace('+', 's') + (rerollhits ? ', rerolling ' + (rerollhits < 6 ? rerollhits + 's' : 'misses') + (rerollHitsRule ? ' (' + rerollHitsRule + ')' : '') : '')), );
 
                 // to hit roll
                 susHits = calcDiceRoll(score, '6+', 0, rerollhits) * susHits;
@@ -573,8 +573,11 @@ const MathHammer = (function() {
                     showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds lost', );
                 }
 
-                if (score < defender.wounds * defender.count) {
-                    showMessage('You would need ' + defender.count * Math.round(1000 / (score / defender.wounds), 4) / 1000 + ' ' + attacker.name + (attacker.name.substr(attacker.name.length - 1) != 's' ? 's' : '') + ' to kill ' + defender.count + ' ' + defender.name + (defender.count > 1 ? 's' : '') + ' in 1 round', );
+                let targetWounds = defender.wounds * defender.count;
+                let woundsPerAttacker = score / attacker.count;
+
+                if (score < targetWounds) {
+                    showMessage('You would need ' + (Math.round(1000 / (woundsPerAttacker / targetWounds), 4) / 1000) + ' ' + attacker.name + (attacker.name.substr(attacker.name.length - 1) != 's' ? 's' : '') + ' to kill ' + defender.count + ' ' + defender.name + (defender.name.substr(defender.name.length - 1) != 's' ? 's' : '') + ' in 1 round', );
                 } else {
                     showMessage(attacker.count + ' ' + attacker.name + (attacker.count > 1 ? 's' : '') + ' can kill ' + Math.round((score / defender.wounds) * 1000, 4) / 1000 + ' ' + defender.name + (defender.name.substr(defender.name.length - 1) != 's' ? 's' : '') + ' in 1 round', );
                 }
