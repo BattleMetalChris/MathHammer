@@ -464,12 +464,12 @@ const MathHammer = (function() {
                     let roll = match[1];
                     type = type.slice(0, match.index).trim();
 
-                    if (defender.keywords.toLowerCase().includes(type.toLowerCase())) {
+                    if (defender.keywords.all && defender.keywords.all.includes(keyword) || defender.keywords.faction && defender.keywords.faction.includes(keyword) || defender.keywords.model && defender.keywords.model.includes(keyword)) {
                         anti_message = 'anti-' + type.toTitleCase() +' ' + roll;
                         if (anti_crit === null ||parseInt(roll) < anti_crit) {
                             anti_crit = parseInt(roll);
                         }
-                    }                
+                    }               
                 });
 
                 weapon.special.hasSpecial('blast', (num) => {
@@ -505,7 +505,7 @@ const MathHammer = (function() {
                 }
                 score = calcDiceRoll(score, torrent ? '1+' : weapon.skill, hitMod, rerollhits);
 
-                showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' hits' + (susHits ? ' (including ' + Math.round(susHits * 1000, 4) / 1000 + ' sustained hits)' : ''), );
+                showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' hits' + (susHits ? ' (including ' + Math.roundTo(susHits, 4) + ' sustained hits)' : ''), );
 
                 // to wound roll
                 let strength = weapon.strength.toLowerCase() == 'user' ? attacker.strength : getAvg(weapon.strength);
@@ -517,12 +517,12 @@ const MathHammer = (function() {
                 showMessage('Roll to wound: Strength ' + strengthStr + ', toughness ' + defender.toughness + (woundMod ? ' (' + woundMod + ' mod) ' : '') + ' ' +anti_message + ' - wounding on ' + woundRoll.replace('+', 's') + (rerollwounds ? ', rerolling ' + (rerollwounds < 6 ? rerollwounds + 's' : 'misses') + (rerollWoundsRule ? ' (' + rerollWoundsRule + ')' : '') : ''), );
 
                 if (critHits) {
-                    showMessage('Lethal hits: ' + Math.round(critHits * 1000, 4) / 1000 + ' hits auto-wound', );
+                    showMessage('Lethal hits: ' + Math.roundTo(critHits, 4) + ' hits auto-wound', );
                 }
 
                 let critWounds = calcDiceRoll(score, (anti_crit ? anti_crit + '+': '6+'), 0, rerollwounds);
                 score = calcDiceRoll(score - critHits, woundRoll, woundMod, rerollwounds) + critHits;
-                showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds');
+                showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds');
 
                 // armour save
                 let save = defender.save;
@@ -546,13 +546,13 @@ const MathHammer = (function() {
                 showMessage('Armour save: ' + defender.save + apMessage + invulnMessage + ' | ' + (parseInt(save.split('+')[0]) > 6 ? "can't save" : 'blocking on ' + save.split('+')[0] + 's'), );
 
                 if (weapon.special.includes('devastating wounds')) {
-                    showMessage('Devastating Wounds: ' + Math.round(critWounds * 1000, 4) / 1000 + ' cannot be saved', );
+                    showMessage('Devastating Wounds: ' + Math.roundTo(critWounds, 4) + ' cannot be saved', );
                     score = calcBlockDiceRoll(score - critWounds, save) + critWounds;
                 } else {
                     score = calcBlockDiceRoll(score, save);
                 }
 
-                showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds');
+                showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds');
 
                 if (weapon.special.includes('melta') && halfRange) {
                     let melta = weapon.special.split('melta')[1].split(/[,\n]/)[0].trim().toUpperCase();
@@ -563,25 +563,38 @@ const MathHammer = (function() {
                 showMessage(weapon.damage + ' dmg per wound' + (dmgRule ? " ("+dmgRule+") " : "") + (parseInt(defender.wounds) < parseInt(getAvg(weapon.damage)) ? ' | target can only lose ' + defender.wounds + ' wounds' : ''), );
                 score = score * Math.min(getAvg(weapon.damage), defender.wounds);
 
-                showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds lost', );
+                showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds lost', );
 
                 if (defender.special.includes('FNP')) {
                     let fnp = defender.special.split('FNP')[1].split('+')[0];
 
                     showMessage('Feel No Pain roll, blocks damage on ' + fnp + 's');
                     score = calcBlockDiceRoll(score, fnp + '+');
-                    showMessage('Avg Total: ' + Math.round(score * 1000, 4) / 1000 + ' wounds lost', );
+                    showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds lost', );
                 }
 
                 let targetWounds = defender.wounds * defender.count;
                 let woundsPerAttacker = score / attacker.count;
+                let attackersNeeded = Math.roundTo(targetWounds / woundsPerAttacker, 4);
+                let attackersToKillOne = Math.roundTo(parseInt(defender.wounds) / woundsPerAttacker, 4);
+                let defendersKilled = Math.roundTo(score / parseInt(defender.wounds), 4);
+
+                let attackerName = attacker.name + (attacker.name.substr(attacker.name.length - 1) != 's' ? 's' : ''); 
+                let defenderName = defender.name + (defender.name.substr(defender.name.length - 1) != 's' ? 's' : ''); 
 
                 if (score < targetWounds) {
-                    showMessage('You would need ' + (Math.round(1000 / (woundsPerAttacker / targetWounds), 4) / 1000) + ' ' + attacker.name + (attacker.name.substr(attacker.name.length - 1) != 's' ? 's' : '') + ' to kill ' + defender.count + ' ' + defender.name + (defender.name.substr(defender.name.length - 1) != 's' ? 's' : '') + ' in 1 round', );
+                    showMessage('You would need ' +attackersNeeded + ' ' + attackerName + ' to kill ' + defender.count + ' ' + defenderName + ' in 1 round');
                 } else {
-                    showMessage(attacker.count + ' ' + attacker.name + (attacker.count > 1 ? 's' : '') + ' can kill ' + Math.round((score / defender.wounds) * 1000, 4) / 1000 + ' ' + defender.name + (defender.name.substr(defender.name.length - 1) != 's' ? 's' : '') + ' in 1 round', );
+                    showMessage(attacker.count + ' ' + attackerName + ' can kill ' + defendersKilled + ' ' + defenderName + ' in 1 round');
                 }
-
+                if (defender.count > 1) {
+                    if (attackersNeeded / defender.count > 1) {
+                        showMessage('You would need ' + (attackersNeeded / defender.count) + ' ' + attackerName + ' to kill 1 ' + defenderName + ' in 1 round');
+                    } else {
+                        showMessage('1 ' + attackerName + ' would kill ' + (defendersKilled / attacker.count) + ' ' + defenderName + ' in 1 round');
+                    }
+                    
+                }
                 showMessage('');
             }
         }
@@ -811,6 +824,15 @@ const MathHammer = (function() {
                             item.hasSpecial(keyword, foundFunc, options);
                         }
                     }
+                };
+            }
+
+        
+            // extend Math.round to allow for rounding to a certain number of decimal places, used for cleaner output of results
+            if (!Math.roundTo) {
+                Math.roundTo = function(number, decimals) {
+                    const factor = Math.pow(10, decimals);
+                    return Math.round(number * factor) / factor;
                 };
             }
 
