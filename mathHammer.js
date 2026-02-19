@@ -462,9 +462,12 @@ const MathHammer = (function() {
                     if (!match) return;
 
                     let roll = match[1];
-                    type = type.slice(0, match.index).trim();
+                    type = type.slice(0, match.index).trim().toLowerCase();
 
-                    if (defender.keywords.all && defender.keywords.all.includes(keyword) || defender.keywords.faction && defender.keywords.faction.includes(keyword) || defender.keywords.model && defender.keywords.model.includes(keyword)) {
+                    if (defender.keywords.all && defender.keywords.all.map(k => k.toLowerCase()).includes(type) || 
+                        defender.keywords.faction && defender.keywords.faction.map(k => k.toLowerCase()).includes(type) || 
+                        defender.keywords.model && defender.keywords.model.map(k => k.toLowerCase()).includes(type)) {
+
                         anti_message = 'anti-' + type.toTitleCase() +' ' + roll;
                         if (anti_crit === null ||parseInt(roll) < anti_crit) {
                             anti_crit = parseInt(roll);
@@ -587,14 +590,16 @@ const MathHammer = (function() {
                 } else {
                     showMessage(attacker.count + ' ' + attackerName + ' can kill ' + defendersKilled + ' ' + defenderName + ' in 1 round');
                 }
-                if (defender.count > 1) {
-                    if (attackersNeeded / defender.count > 1) {
-                        showMessage('You would need ' + (attackersNeeded / defender.count) + ' ' + attackerName + ' to kill 1 ' + defenderName + ' in 1 round');
-                    } else {
-                        showMessage('1 ' + attackerName + ' would kill ' + (defendersKilled / attacker.count) + ' ' + defenderName + ' in 1 round');
-                    }
-                    
+                if (attackersNeeded / defender.count > 1) {
+                    showMessage('You would need ' + Math.roundTo(attackersNeeded / defender.count, 4) + ' ' + attackerName + ' to kill 1 ' + defenderName + ' in 1 round');
                 }
+                if (defendersKilled > 1) {
+                    showMessage(attacker.count + ' ' + attackerName + ' would kill ' + Math.roundTo(defendersKilled / attacker.count, 4) + ' ' + defenderName + ' each in 1 round');
+                }
+                if (attackersNeeded / defender.count < 1) {
+                    showMessage('1 ' + attackerName + ' would kill ' + Math.roundTo(defendersKilled / attacker.count, 4) + ' ' + defenderName + ' in 1 round');
+                }
+
                 showMessage('');
             }
         }
