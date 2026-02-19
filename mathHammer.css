@@ -201,6 +201,11 @@ textarea {
     padding: 7px;
     border-radius: 6px;
 }
+#headerSection .header-item.title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
 
 .header-item li {
     margin-bottom: 6px;
