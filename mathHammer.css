@@ -1,189 +1,231 @@
 body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                background: #f4f4f4;
-            }
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #f4f4f4;
+}
 
-            h2 {
-                margin-top: 30px;
-            }
+h2 {
+    margin-top: 30px;
+}
 
-            .container {
-                max-width: 1200px;
-                margin: auto;
-                background: #fff;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            }
+.container {
+    max-width: 1200px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
 
-            textarea {
-                width: 100%;
-                height: 200px;
-                padding: 10px;
-                font-family: monospace;
-                resize: vertical;
-                box-sizing: border-box;
-            }
+textarea {
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    font-family: monospace;
+    resize: vertical;
+    box-sizing: border-box;
+}
 
-            .section {
-                margin-top: 25px;
-            }
-            
-            #swapBtn {
-                height: 30px;
-                justify-self: center;
-                align-self: center;
-            }
+.section {
+    margin-top: 25px;
+}
 
-            #buttonSection span {
-                font-size: 15px;
-                color: red;
-                font-weight: bold;
-                padding: 10px;
-            }
+#swapBtn {
+    height: 30px;
+    justify-self: center;
+    align-self: center;
+}
 
-            #buttonSection button {
-                font-size: 30px;
-                display: none;
-            }
+#buttonSection span {
+    font-size: 15px;
+    color: red;
+    font-weight: bold;
+    padding: 10px;
+}
 
-            #buttonSection .shooting_warning, #buttonSection .melee_warning {
-                display: none;
-            }
+#buttonSection button {
+    font-size: 30px;
+    display: none;
+}
 
-            #modifierSection input {
-                padding: 5px;
-                margin-right: 10px;
-                padding-left: 10px;
-            }
+#buttonSection .shooting_warning, #buttonSection .melee_warning {
+    display: none;
+}
 
-            #modifierSection input[type='checkbox'] {
-                height: 30px;
-                width: 30px;
-                position: relative;
-                top: 9px;
-            }
+#modifierSection input {
+    padding: 5px;
+    margin-right: 10px;
+    padding-left: 10px;
+}
 
-            #combatSection .message {
-                min-width: 10px;
-                height: 20px;
-            }
+#modifierSection input[type='checkbox'] {
+    height: 30px;
+    width: 30px;
+    position: relative;
+    top: 9px;
+}
 
-            #weaponSection .defender {
-                display: none;
-            }
+#combatSection .message {
+    min-width: 10px;
+    height: 20px;
+}
 
-            /* ===== PASTE GRID ===== */
-            .pasteGrid {
-                display: grid;
-                grid-template-columns: 1fr auto 1fr;
-                gap: 20px;
-            }
+#weaponSection .defender {
+    display: none;
+}
 
-            .pasteBox label {
-                font-weight: bold;
-                display: block;
-                margin-bottom: 6px;
-            }
+/* ===== PASTE GRID ===== */
+.pasteGrid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px;
+}
 
-            /* Responsive stack */
-            @media (max-width: 800px) {
-                .pasteGrid {
-                    grid-template-columns: 1fr;
-                }
-            }
+.pasteBox label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+}
 
-            /* ===== GRID SHARED STYLES ===== */
-            .grid {
-                display: grid;
-                gap: 8px;
-                margin-top: 10px;
-            }
+/* Responsive stack */
+@media (max-width: 800px) {
+    .pasteGrid {
+        grid-template-columns: 1fr;
+    }
+}
 
-            .grid.header div {
-                font-weight: bold;
-                background: #eee;
-                padding: 6px;
-                text-align: center;
-            }
+/* ===== GRID SHARED STYLES ===== */
+.grid {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+}
 
-            .grid input {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 6px;
-                text-align: center;
-            }
+.grid.header div {
+    font-weight: bold;
+    background: #eee;
+    padding: 6px;
+    text-align: center;
+}
 
-            /* ===== MODEL GRID ===== */
-            .modelGrid {
-                grid-template-columns: 
-                /* Count */ 2fr
-                /* Name */ auto 
-                /* M */ 3fr 
-                /* T */ 3fr 
-                /* Sv */ 2fr 
-                /* Invuln */ 2fr 
-                /* W */ 3fr 
-                /* Ld */ 3fr 
-                /* OC */ 3fr 
-                /* Keywords */ auto
-                /* Special */ auto 
-                /* radio */ 1fr;
-                grid-template-rows: auto auto;
-            }
+.grid input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+    text-align: center;
+}
 
-            /* ===== WEAPON GRID ===== */
-            .weaponGrid {
-                grid-template-columns: /* Name */ auto /* Range */ 3fr /* A */ 3fr /* BS/WS */ 3fr /* S */ 3fr /* AP */ 3fr /* D */ 3fr /* Special */ auto /* radio */ 1fr;
-                grid-template-rows: auto auto;
-            }
+/* ===== MODEL GRID ===== */
+.modelGrid {
+    grid-template-columns: 
+    /* Count */ 2fr
+    /* Name */ auto 
+    /* M */ 3fr 
+    /* T */ 3fr 
+    /* Sv */ 2fr 
+    /* Invuln */ 2fr 
+    /* W */ 3fr 
+    /* Ld */ 3fr 
+    /* OC */ 3fr 
+    /* Keywords */ auto
+    /* Special */ auto 
+    /* radio */ 1fr;
+    grid-template-rows: auto auto;
+}
 
-            .modelGrid .hidden {
-                display: none;
-            }
+/* ===== WEAPON GRID ===== */
+.weaponGrid {
+    grid-template-columns: /* Name */ auto /* Range */ 3fr /* A */ 3fr /* BS/WS */ 3fr /* S */ 3fr /* AP */ 3fr /* D */ 3fr /* Special */ auto /* radio */ 1fr;
+    grid-template-rows: auto auto;
+}
 
-            .modelRow {
-                display: contents;
-                /* lets inputs align to grid */
-            }
+.modelGrid .hidden {
+    display: none;
+}
 
-            .weaponRow {
-                display: contents;
-                /* lets inputs align to grid */
-            }
+.modelRow {
+    display: contents;
+    /* lets inputs align to grid */
+}
 
-            .grid.header,
-            .grid.body {
-                grid-column: 1 / -1;   /* span full width */
-            }
+.weaponRow {
+    display: contents;
+    /* lets inputs align to grid */
+}
 
-            .grid.header {
-                border: 1px solid #ccc;
-                border-bottom: none;
-                grid-template-columns: subgrid;
-            }
+.grid.header,
+.grid.body {
+    grid-column: 1 / -1;   /* span full width */
+}
 
-            .grid.body {
-                border: 1px solid #ccc;
-                padding: 6px;
-                grid-template-columns: subgrid;
-            }
+.grid.header {
+    border: 1px solid #ccc;
+    border-bottom: none;
+    grid-template-columns: subgrid;
+}
 
-            .grid.body textarea {
-                min-height: 30px;
-            }
+.grid.body {
+    border: 1px solid #ccc;
+    padding: 6px;
+    grid-template-columns: subgrid;
+}
 
-            .grid.body input {
-                height: 30px;
-                margin-left: 0px;
-            }
+.grid.body textarea {
+    min-height: 30px;
+}
 
-            .grid.body textarea {
-                height: 50px;
-                padding: 2px;
-            }
+.grid.body input {
+    height: 30px;
+    margin-left: 0px;
+}
 
-            #pastedom {
-                display: none;
-            }
+.grid.body textarea {
+    height: 50px;
+    padding: 2px;
+}
+
+#pastedom {
+    display: none;
+}
+
+#headerSection .dropdown:hover .faction-dropdown {
+    display: block;
+}
+
+#headerSection .header-item {
+    margin-bottom: 10px;
+}
+
+#headerSection .header-item.bordered {
+    border: 1px solid #ccc;
+    padding: 7px;
+    border-radius: 6px;
+}
+
+.header-item li {
+    margin-bottom: 6px;
+    line-height: 140%;
+}
+
+.faction-dropdown {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+.dropdown-category {
+    margin-bottom: 10px;
+}
+
+.dropdown-header {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.faction-dropdown a {
+    display: block;
+    text-decoration: none;
+    padding: 2px 0;
+}

@@ -594,7 +594,7 @@ const MathHammer = (function() {
                     showMessage('You would need ' + Math.roundTo(attackersNeeded / defender.count, 4) + ' ' + attackerName + ' to kill 1 ' + defenderName + ' in 1 round');
                 }
                 if (defendersKilled > 1) {
-                    showMessage(attacker.count + ' ' + attackerName + ' would kill ' + Math.roundTo(defendersKilled / attacker.count, 4) + ' ' + defenderName + ' each in 1 round');
+                    showMessage(attacker.count + ' ' + attackerName + ' would kill ' + Math.roundTo(defendersKilled, 4) + ' ' + defenderName + ' each in 1 round');
                 }
                 if (attackersNeeded / defender.count < 1) {
                     showMessage('1 ' + attackerName + ' would kill ' + Math.roundTo(defendersKilled / attacker.count, 4) + ' ' + defenderName + ' in 1 round');

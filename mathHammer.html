@@ -1,179 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
-    <!-- https://jsfiddle.net/o60a3dmb/
+<!-- https://jsfiddle.net/o60a3dmb/
 
 Todo:
 swap attacker/defender
 
 -->
-    <head>
-        <meta charset="UTF-8">
-        <title>40k Statblock Parser</title>
-
-	
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <script src="mathHammer.js"></script>
-        <link rel="stylesheet" href="mathHammer.css">
-
-    </head>
-    <body>
-        <div class="container">
-            ```
-		
-            <!-- Paste Area -->
-            <div class="pasteGrid">
-                <!-- Attacker -->
-                <div class="pasteBox">
-                    <label for="attackerPaste">Attacker</label>
-                    <textarea id="attackerPaste" placeholder="Paste attacker statblock or Wahapedia page..."></textarea>
-                </div>
-                <button id="swapBtn">⇄ Swap</button>
-                <!-- Defender -->
-                <div class="pasteBox">
-                    <label for="defenderPaste">Defender</label>
-                    <textarea id="defenderPaste" placeholder="Paste defender statblock or Wahapedia page..."></textarea>
-                </div>
+<head>
+    <meta charset="UTF-8">
+    <title>40k Statblock Parser</title>
+    
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="mathHammer.js"></script>
+    <link rel="stylesheet" href="mathHammer.css">
+    
+</head>
+<body>
+    
+    
+    
+    <div class="container">
+        <div class="section" id="headerSection">
+            <div class="link-item header-item">
+            Quick Links:
             </div>
-            <div class="section" id="modifierSection">
-                <label for="hit_mod">To-Hit modifier</label>
-                <input name="hit_mod" class="hit_mod" type="number" min="-6" max="6" value="0"/>
-                <label for="wound_mod">To-Wound modifier</label>
-                <input name="wound_mod" class="wound_mod" type="number" min="-6" max="6" value="0"/>
-                <label for="half_range">Is half-range</label>
-                <input name="half_range" class="half_range" type="checkbox" checked="false"/>
+           
+            <div class="link-item header-item">
+                <a href="https://wahapedia.ru/" target="_blank">https://wahapedia.ru/</a>
             </div>
-            <div class="section" id="buttonSection">
-                <button id="calculateShooting"class="calculate">Calculate Shooting
-			</button>
-                <button id="calculateMelee"class="calculate">Calculate Melee
-			</button>
-                <span class="attacker_warning">Attacker not populated</span>
-                <span class="defender_warning">Defender not populated</span>
-                <span class="weapon_warning">No weapons chosen</span>
-                <span class="shooting_warning">No ranged weapons chosen</span>
-                <span class="melee_warning">No melee weapons chosen</span>
-            </div>
-            <div class="section" id="combatSection"></div>
-            <!-- MODEL STATS -->
-            <div class="section" id="modelSection">
-                <div class="attacker" data-side="attacker" data-role="model">
-                    <h2>Attacker Stats</h2>
-                    <h3 class="modelname"></h3>
-                    <div class="grid modelGrid">
-                        <!-- Header -->
-                        <div class="grid header">
-                            <div>Count</div>
-                            <div>Name</div>
-                            <div>Move</div>
-                            <div>Toughness</div>
-                            <div>Save</div>
-                            <div>Invuln</div>
-                            <div>Wounds</div>
-                            <div>Leadership</div>
-                            <div>Objective Control</div>
-                            <div>Keywords</div>
-                            <div>Special Rules</div>
-                            <!-- No heading for radio -->
+            <div class="link-item header-item">
+                <div class="dropdown">
+                    <a href="#" onclick="return false;">Factions</a> (opens in new tabs)
+                    <div class="faction-dropdown">
+                        <!-- Imperium -->
+                        <div class="dropdown-category">
+                            <div class="dropdown-header">Imperium</div>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/adepta-sororitas" target="_blank">Adepta Sororitas</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/adeptus-custodes" target="_blank">Adeptus Custodes</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/adeptus-mechanicus" target="_blank">Adeptus Mechanicus</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/adeptus-titanicus" target="_blank">Adeptus Titanicus</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/astra-militarum" target="_blank">Astra Militarum</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/grey-knights" target="_blank">Grey Knights</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/imperial-agents" target="_blank">Imperial Agents</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/imperial-knights" target="_blank">Imperial Knights</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/space-marines" target="_blank">Space Marines</a>
+                        </div>    
+                        <!-- Chaos -->
+                        <div class="dropdown-category">
+                            <div class="dropdown-header">Chaos</div>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/chaos-daemons" target="_blank">Chaos Daemons</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/chaos-knights" target="_blank">Chaos Knights</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/chaos-space-marines" target="_blank">Chaos Space Marines</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/death-guard" target="_blank">Death Guard</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/emperor-s-children" target="_blank">Emperor’s Children</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/thousand-sons" target="_blank">Thousand Sons</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/world-eaters" target="_blank">World Eaters</a>
                         </div>
-                        <!-- Inputs -->
-                        <div class="grid body">
-                            <input class="count" type="number" min="1" value="1"/>
-                            <span class="name"></span>
-                            <input type="text" class="move"/>
-                            <input type="number" min="1" class="toughness"/>
-                            <input type="text" class="save"/>
-                            <input type="text" class="invuln"/>
-                            <input type="number" min="1"  class="wounds"/>
-                            <input type="text" class="leadership"/>
-                            <input type="number" min="1" class="objective_control"/>
-                            <textarea class="keywords"></textarea>
-                            <textarea class="special"></textarea>
-                            <input type="radio" name="attacker_radio" class="attacker_radio" checked="checked"/>
-                        </div>
-                    </div>  
-                </div>
-                <div class="defender" data-side="defender" data-role="model">
-                    <h2>Defender Stats</h2>
-                    <h3 class="modelname"></h3>
-                    <div class="grid modelGrid">
-                        <!-- Header -->
-                        <div class="grid header">
-                            <div>Count</div>
-                            <div>Name</div>
-                            <div>Move</div>
-                            <div>Toughness</div>
-                            <div>Save</div>
-                            <div>Invuln</div>
-                            <div>Wounds</div>
-                            <div>Leadership</div>
-                            <div>Objective Control</div>
-                            <div>Keywords</div>
-                            <div>Special Rules</div>
-                        </div>
-                        <!-- Body -->
-                        <div class="grid body">
-                            <input class="count" type="number" min="1" value="1"/>
-                            <span class="name"></span>
-                            <input type="text" class="move"/>
-                            <input type="number" min="1" class="toughness"/>
-                            <input type="text" class="save"/>
-                            <input type="text" class="invuln"/>
-                            <input type="number" min="1"  class="wounds"/>
-                            <input type="text" class="leadership"/>
-                            <input type="number" min="1" class="objective_control"/>
-                            <textarea class="keywords"></textarea>
-                            <textarea class="special"></textarea>
-                            <input type="radio" name="defender_radio" class="defender_radio"/
-                        </div>
-                    </div>  
-                </div>
-            </div>
-            <!-- WEAPON STATS -->
-            <div class="section" id="weaponSection">
-                <div class="attacker" data-side="attacker" data-role="weapon">
-                
-                    <h2>Attacker Weapon Stats</h2>
-                    <h3 id="weaponname"></h3>
-                    <div class="grid weaponGrid">
-                        <!-- Header -->   
-                        <div class="grid header">
-                            <div>Name</div>
-                            <div>Range</div>
-                            <div>Attacks</div>
-                            <div>BS/WS</div>
-                            <div>Strength</div>
-                            <div>AP</div>
-                            <div>Damage</div>
-                            <div>Special</div>
-                        </div>
-                        <!-- Body -->
-                        <div class="grid body">
-                            <span class="name"></span>
-                            <input type="text" class="range"/>
-                            <input type="text" min="1" class="attacks"/>
-                            <input type="text" class="skill"/>
-                            <input type="text" min="1" class="strength"/>
-                            <input type="text" class="ap"/>
-                            <input type="text" class="damage"/>
-                            <textarea class="special"></textarea>
-                            <input type="checkbox" name="checked[]" class="check"/>
+                        
+                        <!-- Xenos -->
+                        <div class="dropdown-category">
+                            <div class="dropdown-header" target="_blank">Xenos</div>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/aeldari" target="_blank">Aeldari</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/drukhari" target="_blank">Drukhari</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/genestealer-cults" target="_blank">Genestealer Cults</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/leagues-of-votann" target="_blank">Leagues of Votann</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/necrons" target="_blank">Necrons</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/orks" target="_blank">Orks</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/t-au-empire" target="_blank">T’au Empire</a>
+                            <a href="https://wahapedia.ru//wh40k10ed/factions/tyranids" target="_blank">Tyranids</a>
                         </div>
                     </div>
-                </div>   
+                </div>
+            </div> 
+            <div class="header-item bordered">   
+                <p>Instructions: </p>
+                <ul>
+                    <li>Go to <a href="https://wahapedia.ru/" target="_blank">https://wahapedia.ru/</a> (or use the quick faction links above, within Wahapedia the skull icon in the bottom-right will show individual units' pages).</li>
+                    <li>Find a unit, copy the statblock or the whole page and paste it in the appropriate box. Then click calculate! </li>
+                    <li>You can also adjust the number in each unit, the to-hit and to-wound modifiers and whether the weapon is half-range or not. The calculator assumes all models are firing at the same target, so if you have a unit with multiple weapons it will calculate the average of all the weapons' stats. </li>
+                    <li>Note that this calculator is meant for quick comparisons and may not be 100% accurate in all cases, especially for units with special rules that affect their stats or weapons, but I've done my best include all the generic ones. </li>
+                    <li>For unsupported special rules that affect a specific stat (for example AP), you can edit the models' and weapons' stats directly before calculating. </li>
+                </ul>
             </div>
-            <div class="section" id="pastedom"></div>
- 
+            <div class="header-item">
+                <p>You can let me know if you find any issues or have suggestions for improvement at <a href="https://github.com/BattleMetalChris/MathHammer" target="_blank">https://github.com/BattleMetalChris/MathHammer</a></p>
+                <p>Feel free to grab the source code from there and host it yourself, or modify it for your own use</p>
+            </div>   
+
         </div>
-    </body>
+        
+        <!-- Paste Area -->
+        <div class="pasteGrid">
+            <!-- Attacker -->
+            <div class="pasteBox">
+                <label for="attackerPaste">Attacker</label>
+                <textarea id="attackerPaste" placeholder="Paste attacker statblock or Wahapedia page..."></textarea>
+            </div>
+            <button id="swapBtn">⇄ Swap</button>
+            <!-- Defender -->
+            <div class="pasteBox">
+                <label for="defenderPaste">Defender</label>
+                <textarea id="defenderPaste" placeholder="Paste defender statblock or Wahapedia page..."></textarea>
+            </div>
+        </div>
+        <div class="section" id="modifierSection">
+            <label for="hit_mod">To-Hit modifier</label>
+            <input name="hit_mod" class="hit_mod" type="number" min="-6" max="6" value="0"/>
+            <label for="wound_mod">To-Wound modifier</label>
+            <input name="wound_mod" class="wound_mod" type="number" min="-6" max="6" value="0"/>
+            <label for="half_range">Is half-range</label>
+            <input name="half_range" class="half_range" type="checkbox" checked="false"/>
+        </div>
+        <div class="section" id="buttonSection">
+            <button id="calculateShooting"class="calculate">Calculate Shooting
+            </button>
+            <button id="calculateMelee"class="calculate">Calculate Melee
+            </button>
+            <span class="attacker_warning">Attacker not populated</span>
+            <span class="defender_warning">Defender not populated</span>
+            <span class="weapon_warning">No weapons chosen</span>
+            <span class="shooting_warning">No ranged weapons chosen</span>
+            <span class="melee_warning">No melee weapons chosen</span>
+        </div>
+        <div class="section" id="combatSection"></div>
+        <!-- MODEL STATS -->
+        <div class="section" id="modelSection">
+            <div class="attacker" data-side="attacker" data-role="model">
+                <h2>Attacker Stats</h2>
+                <h3 class="modelname"></h3>
+                <div class="grid modelGrid">
+                    <!-- Header -->
+                    <div class="grid header">
+                        <div>Count</div>
+                        <div>Name</div>
+                        <div>Move</div>
+                        <div>Toughness</div>
+                        <div>Save</div>
+                        <div>Invuln</div>
+                        <div>Wounds</div>
+                        <div>Leadership</div>
+                        <div>Objective Control</div>
+                        <div>Keywords</div>
+                        <div>Special Rules</div>
+                        <!-- No heading for radio -->
+                    </div>
+                    <!-- Inputs -->
+                    <div class="grid body">
+                        <input class="count" type="number" min="1" value="1"/>
+                        <span class="name"></span>
+                        <input type="text" class="move"/>
+                        <input type="number" min="1" class="toughness"/>
+                        <input type="text" class="save"/>
+                        <input type="text" class="invuln"/>
+                        <input type="number" min="1"  class="wounds"/>
+                        <input type="text" class="leadership"/>
+                        <input type="number" min="1" class="objective_control"/>
+                        <textarea class="keywords"></textarea>
+                        <textarea class="special"></textarea>
+                        <input type="radio" name="attacker_radio" class="attacker_radio" checked="checked"/>
+                    </div>
+                </div>  
+            </div>
+            <div class="defender" data-side="defender" data-role="model">
+                <h2>Defender Stats</h2>
+                <h3 class="modelname"></h3>
+                <div class="grid modelGrid">
+                    <!-- Header -->
+                    <div class="grid header">
+                        <div>Count</div>
+                        <div>Name</div>
+                        <div>Move</div>
+                        <div>Toughness</div>
+                        <div>Save</div>
+                        <div>Invuln</div>
+                        <div>Wounds</div>
+                        <div>Leadership</div>
+                        <div>Objective Control</div>
+                        <div>Keywords</div>
+                        <div>Special Rules</div>
+                    </div>
+                    <!-- Body -->
+                    <div class="grid body">
+                        <input class="count" type="number" min="1" value="1"/>
+                        <span class="name"></span>
+                        <input type="text" class="move"/>
+                        <input type="number" min="1" class="toughness"/>
+                        <input type="text" class="save"/>
+                        <input type="text" class="invuln"/>
+                        <input type="number" min="1"  class="wounds"/>
+                        <input type="text" class="leadership"/>
+                        <input type="number" min="1" class="objective_control"/>
+                        <textarea class="keywords"></textarea>
+                        <textarea class="special"></textarea>
+                        <input type="radio" name="defender_radio" class="defender_radio"/
+                    </div>
+                </div>  
+            </div>
+        </div>
+        <!-- WEAPON STATS -->
+        <div class="section" id="weaponSection">
+            <div class="attacker" data-side="attacker" data-role="weapon">
+                
+                <h2>Attacker Weapon Stats</h2>
+                <h3 id="weaponname"></h3>
+                <div class="grid weaponGrid">
+                    <!-- Header -->   
+                    <div class="grid header">
+                        <div>Name</div>
+                        <div>Range</div>
+                        <div>Attacks</div>
+                        <div>BS/WS</div>
+                        <div>Strength</div>
+                        <div>AP</div>
+                        <div>Damage</div>
+                        <div>Special</div>
+                    </div>
+                    <!-- Body -->
+                    <div class="grid body">
+                        <span class="name"></span>
+                        <input type="text" class="range"/>
+                        <input type="text" min="1" class="attacks"/>
+                        <input type="text" class="skill"/>
+                        <input type="text" min="1" class="strength"/>
+                        <input type="text" class="ap"/>
+                        <input type="text" class="damage"/>
+                        <textarea class="special"></textarea>
+                        <input type="checkbox" name="checked[]" class="check"/>
+                    </div>
+                </div>
+            </div>   
+        </div>
+        <div class="section" id="pastedom"></div>
+        
+    </div>
+</body>
 </html>
 <script>
-
+    
     var mathHammer;
     $(document).ready(function() {
         mathHammer = MathHammer();
         mathHammer.init();    
     });
-
-
+    
+    
 </script>
