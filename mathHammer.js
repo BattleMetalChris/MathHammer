@@ -557,10 +557,11 @@ const MathHammer = (function() {
 
                 showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds');
 
-                if (weapon.special.includes('melta') && halfRange) {
-                    let melta = weapon.special.split('melta')[1].split(/[,\n]/)[0].trim().toUpperCase();
-                    dmgRule = "Melta "+melta;
-                    weapon.damage = modDice(weapon.damage, melta);
+                if (halfRange) {
+                    weapon.special.hasSpecial('melta', (num) => {
+                        dmgRule = "Melta "+num;
+                        weapon.damage = modDice(weapon.damage, num);
+                    });
                 }
 
                 showMessage(weapon.damage + ' dmg per wound' + (dmgRule ? " ("+dmgRule+") " : "") + (parseInt(defender.wounds) < parseInt(getAvg(weapon.damage)) ? ' | target can only lose ' + defender.wounds + ' wounds' : ''), );
@@ -568,13 +569,11 @@ const MathHammer = (function() {
 
                 showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds lost', );
 
-                if (defender.special.includes('FNP')) {
-                    let fnp = defender.special.split('FNP')[1].split('+')[0];
-
+                defender.special.hasSpecial('FNP', (fnp) => {
                     showMessage('Feel No Pain roll, blocks damage on ' + fnp + 's');
                     score = calcBlockDiceRoll(score, fnp + '+');
                     showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds lost', );
-                }
+                });
 
                 let targetWounds = defender.wounds * defender.count;
                 let woundsPerAttacker = score / attacker.count;
