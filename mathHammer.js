@@ -499,13 +499,13 @@ const MathHammer = (function() {
                 showMessage('Roll to hit: ' + weapon.attacks + (blast ? ' + ' + blast + ' blast' : '') + ' attacks' + (attacker.count > 1 ? ' each' : '') + (hitRule ? " ("+hitRule+") " : "") + ", "+(hitMod ? ' (' + hitMod + ' mod) ' : '') + 'hitting ' + (torrent ? 'automatically' : 'on ' + weapon.skill.replace('+', 's') + (rerollhits ? ', rerolling ' + (rerollhits < 6 ? rerollhits + 's' : 'misses') + (rerollHitsRule ? ' (' + rerollHitsRule + ')' : '') : '')), );
 
                 // to hit roll
-                susHits = calcDiceRoll(score, '6+', 0, rerollhits) * susHits;
+                susHits = calcDiceRoll(score, '6+', hitMod, rerollhits) * susHits;
                 score = score + susHits;
 
                 let critHits = 0;
-                if (weapon.special.includes('lethal hits')) {
-                    critHits = calcDiceRoll(score, '6+', 0, rerollhits);
-                }
+                weapon.special.hasSpecial('lethal hits', (num) => {
+                    critHits = calcDiceRoll(score, num ?? '6+', hitMod, rerollhits);
+                });
                 score = calcDiceRoll(score, torrent ? '1+' : weapon.skill, hitMod, rerollhits);
 
                 showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' hits' + (susHits ? ' (including ' + Math.roundTo(susHits, 4) + ' sustained hits)' : ''), );
