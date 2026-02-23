@@ -236,8 +236,8 @@ swap attacker/defender
         <div class="section" id="buildingblocks">
             <div class="textInputSpinner">
                 <div class="spinnerButtons">
-                    <div class="spinnerButton" data-mod="1">&#x25B2;</div>
-                    <div class="spinnerButton" data-mod="-1">&#x25BC;</div>
+                    <div class="spinnerButton" data-mod="1"><span>&#x25B2;</span></div>
+                    <div class="spinnerButton" data-mod="-1"><span>&#x25BC;</span></div>
                 </div>
             </div>
         </div>
@@ -277,11 +277,14 @@ swap attacker/defender
             }
         }); 
 
-        $('.grid.body .textInputSpinner .spinnerButtons div').off('click').on('click', function() {
+        addSpinnerEvents($('.grid.body .textInputSpinner .spinnerButtons div'));
+            
+    }
+
+    function addSpinnerEvents($spinnerButton) {
+        $spinnerButton.off('click').on('click', function() {
             updateTextSpinner($(this));
         });
-
-            
     }
 
     function updateTextSpinner($button) {

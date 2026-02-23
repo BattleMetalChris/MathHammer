@@ -251,7 +251,8 @@ const MathHammer = (function() {
                 $row.find('.keywords').val(Object.values(model.keywords).flat().join(', '));
                 $row.find('.special').val(model.special);
                 $row.find('input[type="radio"]').prop('checked', false);
- 
+
+                addSpinnerEvents($row.find('.textInputSpinner .spinnerButtons div'));
             });
 
             let checkedModel = models.find(model => model.checked);
@@ -297,6 +298,8 @@ const MathHammer = (function() {
                 $row.find('.damage').val(weapon.damage);
                 $row.find('.special').val(weapon.special);
                 $row.find('.check').prop('checked', weapon.checked);
+
+                addSpinnerEvents($row.find('.textInputSpinner .spinnerButtons div'));
             });
 
             $section.find('textarea').each(function() {
