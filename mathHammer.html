@@ -233,6 +233,14 @@ swap attacker/defender
                 </div>
             </div>   
         </div>
+        <div class="section" id="buildingblocks">
+            <div class="textInputSpinner">
+                <div class="spinnerButtons">
+                    <div class="spinnerButton" data-mod="1">&#x25B2;</div>
+                    <div class="spinnerButton" data-mod="-1">&#x25BC;</div>
+                </div>
+            </div>
+        </div>
         <div class="section" id="pastedom"></div>
         
         <div class="section footer" id="footerSection">
@@ -245,8 +253,105 @@ swap attacker/defender
     var mathHammer;
     $(document).ready(function() {
         mathHammer = MathHammer();
-        mathHammer.init();    
+        mathHammer.init();  
+        addTextInputSpinners();  
     });
+
+    function addTextInputSpinners() {
+
+        $('.grid.body input[type="text"]').each(function() {    
+            if (!$(this).data('spinner-initialized')) {
+                var $newDiv = $('<div class="textInputSpinner"></div>');              
+                var $spinnerButtons = $('#buildingblocks .textInputSpinner .spinnerButtons').clone();
+
+                $(this).before($newDiv);
+                $newDiv.append($(this));  
+                $newDiv.append($spinnerButtons);
+                $newDiv.data('spinner-initialized', true);
+
+                $newDiv.find('.spinnerButtons .spinnerButton').off('click').on('click', function() {
+                    updateTextSpinner($(this).closest('.textInputSpinner').find('input[type="text"]'));
+                });
+
+                
+            }
+        }); 
+
+        $('.grid.body .textInputSpinner .spinnerButtons div').off('click').on('click', function() {
+            updateTextSpinner($(this));
+        });
+
+            
+    }
+
+    function updateTextSpinner($button) {
+        var types = { diceroll:1, targetroll:2, distance:3, modifier:4 }; // diceroll: XDY+/-Z, taregtRoll: X+, distance: X", modifier: +X or -X
+        $input = $button.closest('.textInputSpinner').find('input[type="text"]');
+        var currentText = $input.val();
+        var mod = parseInt($button.data('mod'));
+        var type;
+
+        // regex to find diceroll; XDY+/-Z, where X is the number of dice, Y is the number of sides and Z is an optional modifier whoch defaults to 0
+        if (/^\d*d\d+([+-]\d+)?$/i.test(currentText.toLowerCase())) { // matches dice rolls in the format XdY+Z, where X is the number of dice, Y is the number of sides and Z is an optional modifier. The modifier can be either + or - and defaults to 0 if not present
+            type = types.diceroll;
+        }
+        // regex to find target rolls; X+, where a success is achieved on a roll of X or higher, or X-, where a success is achieved on a roll of X or lower
+        else if (/^\d+[+-]$/.test(currentText)) {
+            type = types.targetroll;
+        }
+        // regex to find distance; X" where x is the distance in inches
+        else if (/^(\d+)"$/.test(currentText)) {
+            type = types.distance;
+        }
+        // regex to find modifiers; +X or -X, where X is the value of the modifier
+        else if (/^[+-]\d+$/.test(currentText)) {
+            type = types.modifier;
+        }
+        else if (currentText === "") {
+            currentText = 0;
+            type = types.modifier;    
+        }
+        else {
+            return;
+        }
+
+        var newVal;
+        
+        switch(type) {
+            case types.diceroll:
+                newVal = mathHammer.modDice(currentText, mod).toUpperCase();
+                break;
+            
+            case types.modifier:
+                newVal = parseInt(currentText) + mod;
+                newVal = (newVal > 0 ? "+" : "") + newVal;
+                break;
+
+            case types.targetroll:
+
+                var currentValue = parseInt(currentText) || 0;
+                var maxValue = $input.hasClass('leadership') ? 12 : 6; // assume D6 unless LD, which is 2D6, and set max value accordingly
+                var minValue = 2;
+
+                newVal = currentValue + mod;    
+                newVal = Math.max(minValue, Math.min(maxValue, newVal));
+                newVal = newVal + currentText.slice(-1); // add the + or - back to the end
+
+                break;
+
+            case types.distance:
+                newVal = parseInt(currentText) + mod;
+                newVal = newVal + '"';
+                
+                break;
+        }
+
+        if (newVal) {
+            $input.val(newVal);
+        }
+           
+    }
+
     
     
 </script>

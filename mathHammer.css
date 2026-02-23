@@ -234,3 +234,43 @@ textarea {
     text-decoration: none;
     padding: 2px 0;
 }
+
+.section #buildingblocks {
+    display: none
+}
+
+.textInputSpinner {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 30px;
+}
+
+.textInputSpinner .spinnerButtons {  
+    display: flex;
+    flex-direction: column;
+    width: 13px;
+    position: absolute;
+    right: 6px;
+    /* top: 27%; */
+    transform: scaleY(58%);
+    gap: 2px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    font-size: 10px;
+    color: grey;
+    background-color: #fafafa;
+    align-items: inherit;
+}
+
+.textInputSpinner:hover .spinnerButtons {
+    visibility: visible;
+    opacity: 1;
+}
+
+.textInputSpinner .spinnerButtons .spinnerButton {
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none;     /* old Edge */
+}

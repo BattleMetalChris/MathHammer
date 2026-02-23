@@ -416,38 +416,28 @@ const MathHammer = (function() {
                 woundMod = woundMod ? (woundMod > 0 ? '+' : '') + woundMod : '';
 
                 
-
-                attacker.special.hasSpecial('reroll-hits', (num) => { //
+                let allSpecials = attacker.special.concat(weapon.special);
+            
+                allSpecials.hasSpecial('reroll-hits', (num) => { //
                     if (rerollhits < parseInt(num)) {
                         attacker.special.hasSpecial('Vanguard Predator', () => { rerollHitsRule = 'Vanguard Predator'; });
                         rerollhits = parseInt(num);
                     }
                 });
-                attacker.special.hasSpecial('reroll-wounds', (num) => {
+                allSpecials.hasSpecial('reroll-wounds', (num) => {
                     if (rerollwounds < parseInt(num)) {
                         attacker.special.hasSpecial('Vanguard Predator', () => { rerollWoundsRule = 'Vanguard Predator'; });
                         rerollwounds = parseInt(num);
                     }
                 });
 
-                weapon.special.hasSpecial('reroll-hits', (num) => {
-                    if (rerollhits < parseInt(num)) {
-                        rerollhits = parseInt(num);
-                    }
-                });
-                weapon.special.hasSpecial('reroll-wounds', (num) => {
-                    if (rerollwounds < parseInt(num)) {
-                        rerollwounds = parseInt(num);
-                    }
-                });
-
-                weapon.special.hasSpecial('twin-linked', (num) => {
+                allSpecials.hasSpecial('twin-linked', (num) => {
                     if (rerollwounds < 6) {
                         rerollwounds = 6;
                         rerollWoundsRule = 'Twin-linked';
                     }
                 });
-                weapon.special.hasSpecial('sustained hits', (num) => {
+                allSpecials.hasSpecial('sustained hits', (num) => {
                     susHitsStr = num;
                     susHits = getAvg(susHitsStr);
                 });
@@ -456,7 +446,7 @@ const MathHammer = (function() {
                 let anti_crit = null;
 
                 // look for anti- keywords in weapon special rules, if found, check if defender has that keyword, if so, apply the critical hit threshold to wound rolls
-                weapon.special.hasSpecial('anti-', (type, keyword) => {
+                allSpecials.hasSpecial('anti-', (type, keyword) => {
                     type = type.replace(/\s+/g, ' ').trim();
                     let match = type.match(/(\d+\+)$/); // match a number followed by + at the end of the string, which indicates critical hit threshold for anti-weapon special rules (e.g. "Anti-Infantry 3+" means that the weapon scores a critical hit on rolls of 3+ against infantry units)
                     if (!match) return;
@@ -475,7 +465,7 @@ const MathHammer = (function() {
                     }               
                 });
 
-                weapon.special.hasSpecial('blast', (num) => {
+                allSpecials.hasSpecial('blast', (num) => {
                     blast = Math.floor(defender.count / 5);
                 });
                 
@@ -486,7 +476,7 @@ const MathHammer = (function() {
                 let score = (getAvg(weapon.attacks) + blast) * attacker.count; // add blast hits to attacks, and multiply by number of models to get total attacks
                 let torrent = weapon.special.includes('torrent');
 
-                if (halfRange) weapon.special.hasSpecial('rapid fire', (rapidFireNum) => { 
+                if (halfRange) allSpecials.hasSpecial('rapid fire', (rapidFireNum) => { 
                     weapon.attacks = modDice(weapon.attacks, rapidFireNum);
                     score += getAvg(rapidFireNum); 
                     hitRule = "Rapid fire "+rapidFireNum;	
@@ -503,7 +493,7 @@ const MathHammer = (function() {
                 score = score + susHits;
 
                 let critHits = 0;
-                weapon.special.hasSpecial('lethal hits', (num) => {
+                allSpecials.hasSpecial('lethal hits', (num) => {
                     critHits = calcDiceRoll(score, num ?? '6+', hitMod, rerollhits);
                 });
                 score = calcDiceRoll(score, torrent ? '1+' : weapon.skill, hitMod, rerollhits);
@@ -548,7 +538,12 @@ const MathHammer = (function() {
 
                 showMessage('Armour save: ' + defender.save + apMessage + invulnMessage + ' | ' + (parseInt(save.split('+')[0]) > 6 ? "can't save" : 'blocking on ' + save.split('+')[0] + 's'), );
 
-                if (weapon.special.includes('devastating wounds')) {
+                let devastating_wounds = false;
+                allSpecials.hasSpecial('devastating wounds', (num) => {
+                    devastating_wounds = true;
+                });
+
+                if (devastating_wounds) {    
                     showMessage('Devastating Wounds: ' + Math.roundTo(critWounds, 4) + ' cannot be saved', );
                     score = calcBlockDiceRoll(score - critWounds, save) + critWounds;
                 } else {
@@ -887,6 +882,9 @@ const MathHammer = (function() {
             },
             debug: function() {
                 console.log("Combatants:", combatants);
+            },
+            modDice: function(diceStr, modifier) {
+                return modDice(diceStr, modifier);      
             }
         }
     });
