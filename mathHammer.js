@@ -630,7 +630,9 @@ const MathHammer = (function() {
             if (!rerolls)
                 return hitScore;
 
-            let rerollScore = scoreIn * (1 - hitRate); // work out how many failed
+            rerolls = Math.min(rerolls / diceSides, (1 - hitRate));
+
+            let rerollScore = scoreIn * rerolls; 
             rerollScore = calcDiceRoll(rerollScore, successNeeded, modifier); // roll those again
 
             return hitScore + rerollScore;
