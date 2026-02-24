@@ -8,11 +8,27 @@
 <head>
     <meta charset="UTF-8">
     <title>40k Mathhammer Calculator</title>
-    
-    <!-- jQuery -->
+
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="mathHammer.js?v=1.2.4"></script>
-    <link rel="stylesheet" href="mathHammer.css?v=1.2.4">
+    <script>
+        const VERSION = "v1.2.5";
+
+        $(() => {
+            $('<script>', {
+                src: `mathHammer.js?v=${VERSION}`
+            }).appendTo('head');
+
+            $('<link>', {
+                rel: 'stylesheet',
+                href: `mathHammer.css?v=${VERSION}`
+            }).appendTo('head');
+        });
+
+        $(document).ready(function(){
+            $('#version').text(VERSION);
+        });
+    </script>
     
 </head>
 <body>
@@ -242,7 +258,7 @@
         <div class="section" id="pastedom"></div>
         
         <div class="section footer" id="footerSection">
-            <p>Created by Chris v1.2.4</p>
+            <p>Created by Chris <span id="version"></span></p>
     </div>
 </body>
 </html>
