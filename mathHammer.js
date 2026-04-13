@@ -476,11 +476,13 @@ const MathHammer = (function() {
 
                 showMessage('Attacker weapon: ' + weapon.name);
 
-                let score = (getAvg(weapon.attacks) + blast) * attacker.count; // add blast hits to attacks, and multiply by number of models to get total attacks
+                let attacks = weapon.attacks;
+
+                let score = (getAvg(attacks) + blast) * attacker.count; // add blast hits to attacks, and multiply by number of models to get total attacks
                 let torrent = weapon.special.includes('torrent');
 
                 if (halfRange) allSpecials.hasSpecial('rapid fire', (rapidFireNum) => { 
-                    weapon.attacks = modDice(weapon.attacks, rapidFireNum);
+                    attacks = modDice(attacks, rapidFireNum);
                     score += getAvg(rapidFireNum); 
                     hitRule = "Rapid fire "+rapidFireNum;	
                 });
@@ -489,7 +491,7 @@ const MathHammer = (function() {
                     showMessage(attacker.count + ' models attacking & ' + defender.count + ' models defending');
                 }   
 
-                showMessage('Roll to hit: ' + weapon.attacks + (blast ? ' + ' + blast + ' blast' : '') + ' attacks' + (attacker.count > 1 ? ' each' : '') + (hitRule ? " ("+hitRule+") " : "") + ", "+(hitMod ? ' (' + hitMod + ' mod) ' : '') + 'hitting ' + (torrent ? 'automatically' : 'on ' + weapon.skill.replace('+', 's') + (rerollhits ? ', rerolling ' + (rerollhits < 6 ? rerollhits + 's' : 'misses') + (rerollHitsRule ? ' (' + rerollHitsRule + ')' : '') : '')), );
+                showMessage('Roll to hit: ' + attacks + (blast ? ' + ' + blast + ' blast' : '') + ' attacks' + (attacker.count > 1 ? ' each' : '') + (hitRule ? " ("+hitRule+") " : "") + ", "+(hitMod ? ' (' + hitMod + ' mod) ' : '') + 'hitting ' + (torrent ? 'automatically' : 'on ' + weapon.skill.replace('+', 's') + (rerollhits ? ', rerolling ' + (rerollhits < 6 ? rerollhits + 's' : 'misses') + (rerollHitsRule ? ' (' + rerollHitsRule + ')' : '') : '')), );
 
                 // to hit roll
                 susHits = calcDiceRoll(score, '6+', hitMod, rerollhits) * susHits;
@@ -555,15 +557,17 @@ const MathHammer = (function() {
 
                 showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds');
 
+                let dmg = weapon.damage;
+
                 if (halfRange) {
                     weapon.special.hasSpecial('melta', (num) => {
                         dmgRule = "Melta "+num;
-                        weapon.damage = modDice(weapon.damage, num);
+                        dmg = modDice(dmg, num);
                     });
                 }
 
-                showMessage(weapon.damage + ' dmg per wound' + (dmgRule ? " ("+dmgRule+") " : "") + (parseInt(defender.wounds) < parseInt(getAvg(weapon.damage)) ? ' | target can only lose ' + defender.wounds + ' wounds' : ''), );
-                score = score * Math.min(getAvg(weapon.damage), defender.wounds);
+                showMessage(dmg + ' dmg per wound' + (dmgRule ? " ("+dmgRule+") " : "") + (parseInt(defender.wounds) < parseInt(getAvg(dmg)) ? ' | target can only lose ' + defender.wounds + ' wounds' : ''), );
+                score = score * Math.min(getAvg(dmg), defender.wounds);
 
                 showMessage('Avg Total: ' + Math.roundTo(score, 4) + ' wounds lost', );
 
