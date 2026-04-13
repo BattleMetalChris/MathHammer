@@ -397,6 +397,8 @@ const MathHammer = (function() {
                 $('#buttonSection .melee_warning').show();
                 return;
             }
+            
+            logCalculation(attacker, defender);
 
             $('#combatSection').empty();
 
@@ -867,7 +869,26 @@ const MathHammer = (function() {
 
             inputHandlers[type](side, name, field, $target.val());
         }
-
+    
+    	function logCalculation(attacker, defender)
+    	{
+        	$.ajax({
+                url: 'log_calc.php',
+                type: 'POST',
+                data: {	'attacker_unit' : attacker.name,
+                        'defender_unit' : defender.name,
+                        'attacker_num'  : attacker.count,
+                        'defender_num'  : defender.count,
+                      }, 
+                success: function(response) {
+                    console.log('Success:', response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });	
+        }
+            
         return {
 
             /* ===== PUBLIC FUNCTIONS ===== */
